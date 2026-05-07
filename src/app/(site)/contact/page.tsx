@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Video, Facebook, Instagram, Linkedin, MessageCircl
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 import SectionHeader from '@/components/site/SectionComponents'
 import ContactForm from '@/components/site/ContactForm'
 
@@ -26,9 +27,11 @@ async function getContactData() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
+  const seo = await getSiteSeo(locale)
   return {
-    title: `${t('contact')} - Shimond`,
-    description: t('contact.subtitle'),
+    title: seo?.defaultSeoTitle || `${t('contact')} - Shimond`,
+    description: seo?.defaultSeoDescription || t('contact.subtitle'),
+    keywords: seo?.defaultSeoKeywords || undefined,
   }
 }
 
@@ -36,6 +39,11 @@ export default async function ContactPage() {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const config = await getContactData()
+  const seo = await getSiteSeo(locale)
+  const companyName = seo?.companyName || config?.companyName || 'Shimond Industry Co., Ltd.'
+  const address = seo?.address || config?.address
+  const phone = seo?.phone || config?.phone
+  const email = seo?.email || config?.email
 
   const socialIcons: Record<string, React.ReactNode> = {
     tiktok: <Video className="w-5 h-5" />,
@@ -74,7 +82,7 @@ export default async function ContactPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.address')}</h3>
-                <p className="text-gray-600">{config?.address || 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China'}</p>
+                <p className="text-gray-600">{address || 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China'}</p>
               </div>
             </div>
 
@@ -84,7 +92,7 @@ export default async function ContactPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.phone')}</h3>
-                <p className="text-gray-600">{config?.phone || '+86 571 8273 8888'}</p>
+                <p className="text-gray-600">{phone || '+86 571 8273 8888'}</p>
               </div>
             </div>
 
@@ -94,7 +102,7 @@ export default async function ContactPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.email')}</h3>
-                <p className="text-gray-600">{config?.email || 'info@shimond.com'}</p>
+                <p className="text-gray-600">{email || 'info@shimond.com'}</p>
               </div>
             </div>
 

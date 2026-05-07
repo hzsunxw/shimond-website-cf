@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 import SectionHeader from '@/components/site/SectionComponents'
 import AddToInquiryButton from '@/components/site/AddToInquiryButton'
 
@@ -29,9 +30,11 @@ async function getProducts() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
+  const seo = await getSiteSeo(locale)
   return {
-    title: `${t('products')} - Shimond`,
-    description: t('products.subtitle'),
+    title: seo?.defaultSeoTitle || `${t('products')} - Shimond`,
+    description: seo?.defaultSeoDescription || t('products.subtitle'),
+    keywords: seo?.defaultSeoKeywords || undefined,
   }
 }
 

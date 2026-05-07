@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 
 async function getCase(slug: string) {
   try {
@@ -20,12 +21,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const caseItem = await getCase(params.slug)
+  const seo = await getSiteSeo(locale)
   if (!caseItem) {
     return { title: t('notFound') }
   }
   return {
-    title: `${caseItem.title} - Shimond`,
-    description: caseItem.seoDescription || caseItem.summary || undefined,
+    title: caseItem.seoTitle || `${caseItem.title} - Shimond`,
+    description: caseItem.seoDescription || caseItem.summary || seo?.defaultSeoDescription || undefined,
+    keywords: caseItem.seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 

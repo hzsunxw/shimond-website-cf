@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const ADMIN_PATH = (process.env.NEXT_PUBLIC_ADMIN_PATH || '/admin').replace(/^\//, '').replace(/\/$/, '');
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
@@ -7,12 +9,16 @@ const nextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   async rewrites() {
-    return [
-      {
-        source: '/admin/:path*',
-        destination: '/admin/:path*',
-      },
-    ];
+    // If admin path is customized, rewrite external path to internal /admin
+    if (ADMIN_PATH && ADMIN_PATH !== 'admin') {
+      return [
+        {
+          source: `/${ADMIN_PATH}/:path*`,
+          destination: '/admin/:path*',
+        },
+      ];
+    }
+    return [];
   },
 };
 

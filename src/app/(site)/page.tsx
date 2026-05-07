@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 import HeroSection from '@/components/site/HeroSection'
 import ProductsSection from '@/components/site/ProductsSection'
 import FeaturesSection from '@/components/site/FeaturesSection'
@@ -42,9 +43,11 @@ async function getHomepageData() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
+  const seo = await getSiteSeo(locale)
   return {
-    title: `Shimond - ${t('hero.tagline')}`,
-    description: t('hero.subtitle'),
+    title: seo?.siteTitle || seo?.defaultSeoTitle || `Shimond - ${t('hero.tagline')}`,
+    description: seo?.siteDescription || seo?.defaultSeoDescription || t('hero.subtitle'),
+    keywords: seo?.defaultSeoKeywords || undefined,
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ADMIN_PATH } from '@/lib/admin-path'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -30,7 +31,7 @@ export default function LoginPage() {
       }
 
       // 登录成功，跳转到后台
-      router.push('/admin')
+      router.push(ADMIN_PATH)
       router.refresh()
     } catch (err) {
       setError('网络错误，请重试')

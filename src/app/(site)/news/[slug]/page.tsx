@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, User } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 
 async function getNewsItem(slug: string) {
   try {
@@ -20,18 +21,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const newsItem = await getNewsItem(params.slug)
+  const seo = await getSiteSeo(locale)
   if (!newsItem) {
     return { title: t('notFound') }
   }
   return {
-    title: `${newsItem.title} - Shimond`,
-    description: newsItem.seoDescription || newsItem.summary || undefined,
+    title: newsItem.seoTitle || `${newsItem.title} - Shimond`,
+    description: newsItem.seoDescription || newsItem.summary || seo?.defaultSeoDescription || undefined,
+    keywords: newsItem.seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 
 function formatDate(date: Date | null, locale: string) {
   if (!date) return ''
-  return new Date(date).toLocaleDateString(locale === 'en' ? 'en-US' : 'zh-CN', {
+  return new Date(date).toLocaleDateString(locale === 'zh' ? 'zh-CN' : locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

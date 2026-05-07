@@ -38,6 +38,26 @@ const translations = {
     inquiry: 'Inquiry List',
     langLabel: 'English',
   },
+  es: {
+    home: 'Inicio',
+    about: 'Sobre Nosotros',
+    products: 'Productos',
+    cases: 'Casos',
+    news: 'Noticias',
+    contact: 'Contáctenos',
+    inquiry: 'Lista de Consultas',
+    langLabel: 'Español',
+  },
+  ar: {
+    home: 'الرئيسية',
+    about: 'من نحن',
+    products: 'المنتجات',
+    cases: 'الحالات',
+    news: 'الأخبار',
+    contact: 'اتصل بنا',
+    inquiry: 'قائمة الاستفسارات',
+    langLabel: 'العربية',
+  },
 }
 
 export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderProps) {
@@ -74,7 +94,7 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
         }
         return {
           ...p,
-          name: locale === 'en' ? (p.nameEn || fallbackNames[p.pageType] || p.name) : p.name,
+          name: locale !== 'zh' ? (p.nameEn || fallbackNames[p.pageType] || p.name) : p.name,
         }
       })
     : defaultNav
@@ -148,6 +168,20 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
                   >
                     <span className="text-2xl">🇺🇸</span>
                     <span>English</span>
+                  </button>
+                  <button
+                    onClick={() => { setLangDropdownOpen(false); setLocale('es') }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-2 ${locale === 'es' ? 'bg-sky-50 text-sky-600' : ''}`}
+                  >
+                    <span className="text-2xl">🇪🇸</span>
+                    <span>Español</span>
+                  </button>
+                  <button
+                    onClick={() => { setLangDropdownOpen(false); setLocale('ar') }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-2 ${locale === 'ar' ? 'bg-sky-50 text-sky-600' : ''}`}
+                  >
+                    <span className="text-2xl">🇸🇦</span>
+                    <span>العربية</span>
                   </button>
                 </div>
               )}

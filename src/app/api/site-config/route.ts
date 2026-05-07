@@ -18,7 +18,7 @@ export async function GET() {
           primaryColor: '#0ea5e9',
           secondaryColor: '#f59e0b',
           accentColor: '#10b981',
-          defaultLanguage: 'zh',
+          defaultLanguage: 'en',
           phone: '+86 571 8273 8888',
           email: 'info@shimond.com',
           address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China',

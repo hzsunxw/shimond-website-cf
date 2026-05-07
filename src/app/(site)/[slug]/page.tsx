@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
+import { getSiteSeo } from '@/lib/seo'
 
 async function getPage(slug: string) {
   try {
@@ -34,14 +35,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const page = await getPage(params.slug)
+  const seo = await getSiteSeo(locale)
   if (!page) {
     return { title: t('notFound') }
   }
   const pageType = (page as any).pageType || params.slug
-  const displayName = locale === 'en' ? (pageTypeEnNames[pageType] || page.name) : page.name
+  const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
   return {
-    title: page.seoTitle || displayName,
-    description: page.seoDescription || undefined,
+    title: page.seoTitle || seo?.defaultSeoTitle || displayName,
+    description: page.seoDescription || seo?.defaultSeoDescription || undefined,
+    keywords: page.seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 
@@ -55,7 +58,7 @@ export default async function DynamicPage({ params }: { params: { slug: string }
   }
 
   const pageType = (page as any).pageType || params.slug
-  const displayName = locale === 'en' ? (pageTypeEnNames[pageType] || page.name) : page.name
+  const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
 
   return (
     <div className="pt-[5rem] pb-20" key={`about-${locale}`}>

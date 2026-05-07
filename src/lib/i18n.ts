@@ -1,8 +1,8 @@
 // Client-side locale helper
 export function getLocale(): string {
-  if (typeof document === 'undefined') return 'zh'
+  if (typeof document === 'undefined') return 'en'
   const match = document.cookie.match(/locale=([^;]+)/)
-  return match ? match[1].trim() : 'zh'
+  return match ? match[1].trim() : 'en'
 }
 
 export function setLocale(locale: string) {

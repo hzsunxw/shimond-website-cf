@@ -59,17 +59,23 @@ async function main() {
   // 创建默认站点配置
   await prisma.siteConfig.upsert({
     where: { id: 'default' },
-    update: {},
+    update: {
+      defaultLanguage: 'en',
+      companyNameEs: 'Shimond Industria',
+      companyNameAr: 'شيموند',
+    },
     create: {
       id: 'default',
       companyName: 'Shimond',
       companyNameEn: 'Shimond Industry',
+      companyNameEs: 'Shimond Industria',
+      companyNameAr: 'شيموند',
       siteTitle: 'Shimond - Professional PVC Products',
       siteDescription: 'Professional manufacturer of high-quality PVC products',
       primaryColor: '#0ea5e9',
       secondaryColor: '#f59e0b',
       accentColor: '#10b981',
-      defaultLanguage: 'zh',
+      defaultLanguage: 'en',
       phone: '+86 571 8273 8888',
       email: 'info@shimond.com',
       address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China',

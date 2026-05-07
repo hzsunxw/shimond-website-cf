@@ -1,19 +1,20 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { ADMIN_PATH, adminRoute } from '@/lib/admin-path'
 
 const menuItems = [
-  { href: '/admin', label: '控制台' },
-  { href: '/admin/settings', label: '站点配置' },
-  { href: '/admin/pages', label: '页面管理' },
-  { href: '/admin/products', label: '产品管理' },
-  { href: '/admin/cases', label: '案例管理' },
-  { href: '/admin/news', label: '新闻管理' },
-  { href: '/admin/orders', label: '订单管理' },
-  { href: '/admin/messages', label: '留言管理' },
-  { href: '/admin/languages', label: '多语言' },
-  { href: '/admin/seo', label: 'SEO 设置' },
-  { href: '/admin/code-snippets', label: '代码注入' },
+  { path: '', label: '控制台' },
+  { path: 'settings', label: '站点配置' },
+  { path: 'pages', label: '页面管理' },
+  { path: 'products', label: '产品管理' },
+  { path: 'cases', label: '案例管理' },
+  { path: 'news', label: '新闻管理' },
+  { path: 'orders', label: '订单管理' },
+  { path: 'messages', label: '留言管理' },
+  { path: 'languages', label: '多语言' },
+  { path: 'seo', label: 'SEO 设置' },
+  { path: 'code-snippets', label: '代码注入' },
 ]
 
 export default function AdminSidebar() {
@@ -26,11 +27,12 @@ export default function AdminSidebar() {
       </div>
       <nav className="px-4 pb-6 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href
+          const href = adminRoute(item.path)
+          const isActive = pathname === href || pathname.startsWith(`${href}/`)
           return (
             <a
-              key={item.href}
-              href={item.href}
+              key={item.path}
+              href={href}
               className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg ${
                 isActive
                   ? 'bg-gray-100 text-gray-900'

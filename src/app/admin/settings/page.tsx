@@ -7,20 +7,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface SiteConfig {
-  companyName: string
-  companyNameEn: string
-  siteTitle: string
-  siteDescription: string
   primaryColor: string
   secondaryColor: string
   accentColor: string
-  phone: string
-  email: string
-  address: string
   mapUrl: string
-  defaultSeoTitle: string
-  defaultSeoDescription: string
-  defaultSeoKeywords: string
   socialLinks: {
     tiktok?: string
     facebook?: string
@@ -28,25 +18,25 @@ interface SiteConfig {
     linkedin?: string
     whatsapp?: string
   }
+  aiEnabled: boolean
+  aiProvider: string
+  aiApiKey: string
+  aiEndpoint: string
+  aiModel: string
 }
 
 export default function SiteConfigPage() {
   const [config, setConfig] = useState<SiteConfig>({
-    companyName: '',
-    companyNameEn: '',
-    siteTitle: '',
-    siteDescription: '',
     primaryColor: '#0ea5e9',
     secondaryColor: '#f59e0b',
     accentColor: '#10b981',
-    phone: '',
-    email: '',
-    address: '',
     mapUrl: '',
-    defaultSeoTitle: '',
-    defaultSeoDescription: '',
-    defaultSeoKeywords: '',
     socialLinks: {},
+    aiEnabled: false,
+    aiProvider: '',
+    aiApiKey: '',
+    aiEndpoint: '',
+    aiModel: '',
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -122,7 +112,7 @@ export default function SiteConfigPage() {
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">站点基础配置</h1>
-        <p className="text-gray-500 mt-1">配置企业信息、品牌色、联系方式和社交媒体</p>
+        <p className="text-gray-500 mt-1">配置品牌色、社交媒体和 AI 参数</p>
       </div>
 
       {message && (
@@ -138,56 +128,6 @@ export default function SiteConfigPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 企业信息 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>企业信息</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">企业名称（中文）</Label>
-                <Input
-                  id="companyName"
-                  value={config.companyName}
-                  onChange={(e) => handleChange('companyName', e.target.value)}
-                  placeholder="Shimond"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyNameEn">企业名称（英文）</Label>
-                <Input
-                  id="companyNameEn"
-                  value={config.companyNameEn}
-                  onChange={(e) => handleChange('companyNameEn', e.target.value)}
-                  placeholder="Shimond Industry"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="siteTitle">网站标题</Label>
-              <Input
-                id="siteTitle"
-                value={config.siteTitle}
-                onChange={(e) => handleChange('siteTitle', e.target.value)}
-                placeholder="Shimond - Professional PVC Products"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="siteDescription">网站描述</Label>
-              <textarea
-                id="siteDescription"
-                value={config.siteDescription}
-                onChange={(e) => handleChange('siteDescription', e.target.value)}
-                placeholder="Professional manufacturer of high-quality PVC products"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* 品牌颜色 */}
         <Card>
           <CardHeader>
@@ -250,91 +190,6 @@ export default function SiteConfigPage() {
           </CardContent>
         </Card>
 
-        {/* 联系方式 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>联系方式</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">电话</Label>
-                <Input
-                  id="phone"
-                  value={config.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  placeholder="+86 571 8273 8888"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">邮箱</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={config.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  placeholder="info@shimond.com"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">地址</Label>
-              <Input
-                id="address"
-                value={config.address}
-                onChange={(e) => handleChange('address', e.target.value)}
-                placeholder="No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="mapUrl">地图链接</Label>
-              <Input
-                id="mapUrl"
-                value={config.mapUrl}
-                onChange={(e) => handleChange('mapUrl', e.target.value)}
-                placeholder="https://maps.google.com/..."
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* SEO 配置 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>SEO 全局配置</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="defaultSeoTitle">默认 SEO 标题</Label>
-              <Input
-                id="defaultSeoTitle"
-                value={config.defaultSeoTitle}
-                onChange={(e) => handleChange('defaultSeoTitle', e.target.value)}
-                placeholder="Shimond - Professional PVC Products Manufacturer"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="defaultSeoDescription">默认 Meta Description</Label>
-              <textarea
-                id="defaultSeoDescription"
-                value={config.defaultSeoDescription}
-                onChange={(e) => handleChange('defaultSeoDescription', e.target.value)}
-                placeholder="High-quality PVC leather, mats, and table protectors..."
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="defaultSeoKeywords">默认 Meta Keywords</Label>
-              <Input
-                id="defaultSeoKeywords"
-                value={config.defaultSeoKeywords}
-                onChange={(e) => handleChange('defaultSeoKeywords', e.target.value)}
-                placeholder="PVC leather, PVC mats, table protector, manufacturer"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* 社交媒体 */}
         <Card>
           <CardHeader>
@@ -360,6 +215,74 @@ export default function SiteConfigPage() {
                   />
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* AI 参数设置 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>AI 参数设置</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="aiEnabled">启用 AI</Label>
+                <select
+                  id="aiEnabled"
+                  value={config.aiEnabled ? 'true' : 'false'}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, aiEnabled: e.target.value === 'true' }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="false">关闭</option>
+                  <option value="true">开启</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="aiProvider">AI 提供商</Label>
+                <select
+                  id="aiProvider"
+                  value={config.aiProvider}
+                  onChange={(e) => handleChange('aiProvider', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">请选择</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="deepseek">DeepSeek</option>
+                  <option value="openrouter">OpenRouter</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="aiApiKey">API Key</Label>
+              <Input
+                id="aiApiKey"
+                type="password"
+                value={config.aiApiKey}
+                onChange={(e) => handleChange('aiApiKey', e.target.value)}
+                placeholder="sk-..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="aiEndpoint">自定义 API 端点（Base URL）</Label>
+              <Input
+                id="aiEndpoint"
+                value={config.aiEndpoint}
+                onChange={(e) => handleChange('aiEndpoint', e.target.value)}
+                placeholder="https://api.openai.com/v1"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="aiModel">模型名称</Label>
+              <Input
+                id="aiModel"
+                value={config.aiModel}
+                onChange={(e) => handleChange('aiModel', e.target.value)}
+                placeholder="gpt-4o-mini"
+              />
             </div>
           </CardContent>
         </Card>

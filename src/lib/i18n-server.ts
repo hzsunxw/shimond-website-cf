@@ -7,8 +7,8 @@ export async function getServerLocale(): Promise<string> {
     const h = await headers()
     const cookie = h.get('cookie') || ''
     const match = cookie.match(/locale=([^;]+)/)
-    return match ? match[1].trim() : 'zh'
+    return match ? match[1].trim() : 'en'
   } catch {
-    return 'zh'
+    return 'en'
   }
 }

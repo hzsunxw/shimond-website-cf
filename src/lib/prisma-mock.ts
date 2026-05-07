@@ -4,6 +4,7 @@
 interface MockData {
   adminUsers: any[]
   siteConfig: any[]
+  siteSeoConfigs: any[]
   pages: any[]
   pageModules: any[]
   serviceItems: any[]
@@ -34,6 +35,8 @@ class MockPrismaClient {
         id: 'default',
         companyName: 'Shimond',
         companyNameEn: 'Shimond Industry',
+        companyNameEs: 'Shimond Industria',
+        companyNameAr: 'شيموند',
         siteTitle: 'Shimond - Professional PVC Products',
         siteDescription: 'Professional manufacturer of high-quality PVC products',
         primaryColor: '#0ea5e9',
@@ -62,6 +65,12 @@ class MockPrismaClient {
       { id: '6', pageType: 'contact', name: '联系我们', nameEn: 'Contact Us', slug: 'contact', status: 'ACTIVE', navSort: 6, showInNav: true },
     ],
     pageModules: [],
+    siteSeoConfigs: [
+      { id: 'seo-zh', languageCode: 'zh', companyName: 'Shimond', siteTitle: 'Shimond - 专业PVC产品制造商', siteDescription: '专业PVC产品制造商，提供人造革、地垫、桌垫保护垫等高品质产品。', defaultSeoTitle: 'Shimond - 专业PVC产品制造商', defaultSeoDescription: '专业PVC产品制造商，提供人造革、地垫、桌垫保护垫等高品质产品。15年行业经验，ISO认证，支持OEM/ODM定制。', defaultSeoKeywords: 'PVC人造革, PVC地垫, 桌垫保护垫, PVC产品制造商, 人造革厂家', defaultOgImage: null, favicon: null, address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China', phone: '+86 571 8273 8888', email: 'info@shimond.com', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'seo-en', languageCode: 'en', companyName: 'Shimond', siteTitle: 'Shimond - Professional PVC Products Manufacturer', siteDescription: 'Professional manufacturer of high-quality PVC leather, mats, and table protectors.', defaultSeoTitle: 'Shimond - Professional PVC Products Manufacturer', defaultSeoDescription: 'Professional manufacturer of high-quality PVC leather, mats, and table protectors. 15+ years experience, ISO certified, OEM/ODM supported.', defaultSeoKeywords: 'PVC leather, PVC mats, table protector, PVC manufacturer, synthetic leather', defaultOgImage: null, favicon: null, address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China', phone: '+86 571 8273 8888', email: 'info@shimond.com', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'seo-es', languageCode: 'es', companyName: 'Shimond', siteTitle: 'Shimond - Fabricante Profesional de Productos PVC', siteDescription: 'Fabricante profesional de cuero PVC, alfombrillas y protectores de mesa de alta calidad.', defaultSeoTitle: 'Shimond - Fabricante Profesional de Productos PVC', defaultSeoDescription: 'Fabricante profesional de cuero PVC, alfombrillas y protectores de mesa de alta calidad. Más de 15 años de experiencia, certificado ISO, OEM/ODM disponible.', defaultSeoKeywords: 'cuero PVC, alfombrillas PVC, protector de mesa, fabricante PVC, cuero sintético', defaultOgImage: null, favicon: null, address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China', phone: '+86 571 8273 8888', email: 'info@shimond.com', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'seo-ar', languageCode: 'ar', companyName: 'شيموند', siteTitle: 'شيموند - مصنع منتجات PVC احترافي', siteDescription: 'شركة تصنيع احترافية لمنتجات PVC عالية الجودة.', defaultSeoTitle: 'شيموند - مصنع منتجات PVC احترافي', defaultSeoDescription: 'شركة تصنيع احترافية لمنتجات PVC عالية الجودة. أكثر من 15 عامًا من الخبرة، معتمدة ISO، OEM/ODM مدعوم.', defaultSeoKeywords: 'جلد PVC, سجاد PVC, حماية الطاولة, مصنع PVC, جلد صناعي', defaultOgImage: null, favicon: null, address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China', phone: '+86 571 8273 8888', email: 'info@shimond.com', createdAt: new Date(), updatedAt: new Date() },
+    ],
     serviceItems: [],
     caseItems: [],
     newsItems: [],
@@ -92,6 +101,9 @@ class MockPrismaClient {
       return this.data.siteConfig[index]
     },
   }
+
+  // SiteSeoConfig operations
+  siteSeoConfig = this.createModelOperations('siteSeoConfigs')
 
   // AdminUser operations
   adminUser = {

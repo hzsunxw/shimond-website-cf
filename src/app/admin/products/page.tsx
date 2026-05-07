@@ -3,18 +3,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Pencil, Trash2, Plus, Upload, X } from 'lucide-react'
+import { Pencil, Trash2, Plus, Upload, X, Languages, Sparkles } from 'lucide-react'
 
 interface Product {
   id: string
   title: string
   titleEn: string | null
+  titleEs: string | null
+  titleAr: string | null
   slug: string
   summary: string | null
+  summaryEn: string | null
+  summaryEs: string | null
+  summaryAr: string | null
   coverImage: string | null
   gallery: string[]
   description: string | null
   descriptionEn: string | null
+  descriptionEs: string | null
+  descriptionAr: string | null
   price: string | null
   priceUnit: string | null
   priceCurrency: string | null
@@ -24,6 +31,15 @@ interface Product {
   seoTitle: string | null
   seoDescription: string | null
   seoKeywords: string | null
+  seoTitleEn: string | null
+  seoDescriptionEn: string | null
+  seoKeywordsEn: string | null
+  seoTitleEs: string | null
+  seoDescriptionEs: string | null
+  seoKeywordsEs: string | null
+  seoTitleAr: string | null
+  seoDescriptionAr: string | null
+  seoKeywordsAr: string | null
   createdAt: string
   updatedAt: string
 }
@@ -31,12 +47,19 @@ interface Product {
 const emptyForm = {
   title: '',
   titleEn: '',
+  titleEs: '',
+  titleAr: '',
   slug: '',
   summary: '',
+  summaryEn: '',
+  summaryEs: '',
+  summaryAr: '',
   coverImage: '',
   gallery: [] as string[],
   description: '',
   descriptionEn: '',
+  descriptionEs: '',
+  descriptionAr: '',
   price: '',
   priceUnit: '',
   priceCurrency: 'USD',
@@ -46,9 +69,33 @@ const emptyForm = {
   seoTitle: '',
   seoDescription: '',
   seoKeywords: '',
+  seoTitleEn: '',
+  seoDescriptionEn: '',
+  seoKeywordsEn: '',
+  seoTitleEs: '',
+  seoDescriptionEs: '',
+  seoKeywordsEs: '',
+  seoTitleAr: '',
+  seoDescriptionAr: '',
+  seoKeywordsAr: '',
 }
 
 type TabKey = 'basic' | 'content' | 'seo'
+
+const languages = [
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+]
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+function getLangField(base: string, lang: string) {
+  return lang === 'zh' ? base : `${base}${capitalize(lang)}`
+}
 
 export default function ProductsAdminPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -59,6 +106,9 @@ export default function ProductsAdminPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('basic')
+  const [activeLang, setActiveLang] = useState('zh')
+  const [translating, setTranslating] = useState(false)
+  const [generatingSeo, setGeneratingSeo] = useState(false)
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
@@ -82,6 +132,7 @@ export default function ProductsAdminPage() {
   const openCreate = () => {
     setEditing(null)
     setForm(emptyForm)
+    setActiveLang('zh')
     setActiveTab('basic')
     setShowModal(true)
   }
@@ -89,14 +140,21 @@ export default function ProductsAdminPage() {
   const openEdit = (item: Product) => {
     setEditing(item)
     setForm({
-      title: item.title,
+      title: item.title || '',
       titleEn: item.titleEn || '',
+      titleEs: item.titleEs || '',
+      titleAr: item.titleAr || '',
       slug: item.slug,
       summary: item.summary || '',
+      summaryEn: item.summaryEn || '',
+      summaryEs: item.summaryEs || '',
+      summaryAr: item.summaryAr || '',
       coverImage: item.coverImage || '',
       gallery: Array.isArray(item.gallery) ? item.gallery : [],
       description: item.description || '',
       descriptionEn: item.descriptionEn || '',
+      descriptionEs: item.descriptionEs || '',
+      descriptionAr: item.descriptionAr || '',
       price: item.price || '',
       priceUnit: item.priceUnit || '',
       priceCurrency: item.priceCurrency || 'USD',
@@ -106,7 +164,17 @@ export default function ProductsAdminPage() {
       seoTitle: item.seoTitle || '',
       seoDescription: item.seoDescription || '',
       seoKeywords: item.seoKeywords || '',
+      seoTitleEn: item.seoTitleEn || '',
+      seoDescriptionEn: item.seoDescriptionEn || '',
+      seoKeywordsEn: item.seoKeywordsEn || '',
+      seoTitleEs: item.seoTitleEs || '',
+      seoDescriptionEs: item.seoDescriptionEs || '',
+      seoKeywordsEs: item.seoKeywordsEs || '',
+      seoTitleAr: item.seoTitleAr || '',
+      seoDescriptionAr: item.seoDescriptionAr || '',
+      seoKeywordsAr: item.seoKeywordsAr || '',
     })
+    setActiveLang('zh')
     setActiveTab('basic')
     setShowModal(true)
   }
@@ -115,6 +183,7 @@ export default function ProductsAdminPage() {
     setShowModal(false)
     setEditing(null)
     setForm(emptyForm)
+    setActiveLang('zh')
   }
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,12 +250,19 @@ export default function ProductsAdminPage() {
       const body: Record<string, unknown> = {
         title: form.title,
         titleEn: form.titleEn || null,
+        titleEs: form.titleEs || null,
+        titleAr: form.titleAr || null,
         slug: form.slug,
         summary: form.summary || null,
+        summaryEn: form.summaryEn || null,
+        summaryEs: form.summaryEs || null,
+        summaryAr: form.summaryAr || null,
         coverImage: form.coverImage || null,
         gallery: form.gallery,
         description: form.description || null,
         descriptionEn: form.descriptionEn || null,
+        descriptionEs: form.descriptionEs || null,
+        descriptionAr: form.descriptionAr || null,
         price: form.price ? parseFloat(form.price) : null,
         priceUnit: form.priceUnit || null,
         priceCurrency: form.priceCurrency || 'USD',
@@ -196,6 +272,15 @@ export default function ProductsAdminPage() {
         seoTitle: form.seoTitle || null,
         seoDescription: form.seoDescription || null,
         seoKeywords: form.seoKeywords || null,
+        seoTitleEn: form.seoTitleEn || null,
+        seoDescriptionEn: form.seoDescriptionEn || null,
+        seoKeywordsEn: form.seoKeywordsEn || null,
+        seoTitleEs: form.seoTitleEs || null,
+        seoDescriptionEs: form.seoDescriptionEs || null,
+        seoKeywordsEs: form.seoKeywordsEs || null,
+        seoTitleAr: form.seoTitleAr || null,
+        seoDescriptionAr: form.seoDescriptionAr || null,
+        seoKeywordsAr: form.seoKeywordsAr || null,
       }
       if (editing) {
         body.id = editing.id
@@ -233,6 +318,128 @@ export default function ProductsAdminPage() {
     } catch (err) {
       console.error('Delete product error:', err)
       alert('\u5220\u9664\u5931\u8d25')
+    }
+  }
+
+  const getLangValue = (base: string, lang: string) => {
+    const field = getLangField(base, lang)
+    return ((form as unknown) as Record<string, string>)[field] || ''
+  }
+
+  const setLangValue = (base: string, lang: string, value: string) => {
+    const field = getLangField(base, lang)
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleAiTranslate = async () => {
+    const targetLangs = languages.filter((l) => l.code !== activeLang).map((l) => l.code)
+    const fields: Record<string, string> = {}
+    const fieldMap: Record<string, string> = {
+      title: getLangField('title', activeLang),
+      summary: getLangField('summary', activeLang),
+      description: getLangField('description', activeLang),
+      seoTitle: getLangField('seoTitle', activeLang),
+      seoDescription: getLangField('seoDescription', activeLang),
+      seoKeywords: getLangField('seoKeywords', activeLang),
+    }
+
+    for (const [key, formKey] of Object.entries(fieldMap)) {
+      const value = ((form as unknown) as Record<string, string>)[formKey]
+      if (value?.trim()) {
+        fields[key] = value
+      }
+    }
+
+    if (Object.keys(fields).length === 0) {
+      alert('当前语言没有可翻译的内容，请先填写字段')
+      return
+    }
+
+    if (!confirm(`将以「${languages.find((l) => l.code === activeLang)?.label}」为基准，翻译到其余 ${targetLangs.length} 种语言。现有内容将被覆盖，是否继续？`)) {
+      return
+    }
+
+    setTranslating(true)
+    try {
+      const res = await fetch('/api/ai/translate-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceLang: activeLang,
+          targetLangs,
+          fields,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        alert(result.error || result.detail || 'AI 翻译失败')
+        return
+      }
+
+      const newForm = { ...form }
+      const formRec = (newForm as unknown) as Record<string, string>
+      for (const lang of targetLangs) {
+        const trans = result.translations[lang]
+        if (!trans) continue
+        const suffix = lang === 'zh' ? '' : capitalize(lang)
+        if (trans.title) formRec[`title${suffix}`] = trans.title
+        if (trans.summary) formRec[`summary${suffix}`] = trans.summary
+        if (trans.description) formRec[`description${suffix}`] = trans.description
+        if (trans.seoTitle) formRec[`seoTitle${suffix}`] = trans.seoTitle
+        if (trans.seoDescription) formRec[`seoDescription${suffix}`] = trans.seoDescription
+        if (trans.seoKeywords) formRec[`seoKeywords${suffix}`] = trans.seoKeywords
+      }
+      setForm(newForm)
+      alert('AI 翻译完成！已填充到其他语言，请检查。')
+    } catch (err) {
+      console.error('AI translate error:', err)
+      alert('AI 翻译失败')
+    } finally {
+      setTranslating(false)
+    }
+  }
+
+  const handleAiGenerateSeo = async () => {
+    const title = getLangValue('title', activeLang)
+    const summary = getLangValue('summary', activeLang)
+    const description = getLangValue('description', activeLang)
+
+    if (!title.trim()) {
+      alert('请先在「基本信息」标签页填写标题，才能生成 SEO 内容')
+      return
+    }
+
+    setGeneratingSeo(true)
+    try {
+      const res = await fetch('/api/ai/generate-seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          summary: summary || undefined,
+          description: description || undefined,
+          lang: activeLang,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        console.error('[AI Generate SEO] server error:', result.error, 'raw:', result.raw)
+        alert(result.error || result.detail || 'AI 生成失败')
+        return
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        [getLangField('seoTitle', activeLang)]: result.seoTitle || '',
+        [getLangField('seoDescription', activeLang)]: result.seoDescription || '',
+        [getLangField('seoKeywords', activeLang)]: result.seoKeywords || '',
+      }))
+      alert('AI SEO 生成完成！')
+    } catch (err) {
+      console.error('AI generate SEO error:', err)
+      alert('AI 生成失败')
+    } finally {
+      setGeneratingSeo(false)
     }
   }
 
@@ -337,6 +544,35 @@ export default function ProductsAdminPage() {
               </button>
             </div>
 
+            <div className='flex items-center justify-between px-6 py-2 bg-gray-50 border-b border-gray-200'>
+              <div className='flex items-center gap-1'>
+                <Languages className='w-4 h-4 text-gray-400 mr-1' />
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type='button'
+                    onClick={() => setActiveLang(lang.code)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                      activeLang === lang.code
+                        ? 'bg-white text-sky-600 shadow-sm border border-gray-200 font-medium'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {lang.flag} {lang.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type='button'
+                onClick={handleAiTranslate}
+                disabled={translating}
+                className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-purple-200'
+              >
+                <Sparkles className='w-3.5 h-3.5' />
+                {translating ? 'AI 翻译中...' : '🤖 AI 翻译到其他语言'}
+              </button>
+            </div>
+
             <div className='flex border-b border-gray-200'>
               {tabs.map((tab) => (
                 <button
@@ -353,25 +589,31 @@ export default function ProductsAdminPage() {
               ))}
             </div>
 
-            <form onSubmit={handleSubmit} className='px-6 py-4 space-y-4'>
+            <form
+              onSubmit={handleSubmit}
+              className={`px-6 py-4 space-y-4 ${activeLang === 'ar' ? 'text-right' : ''}`}
+              dir={activeLang === 'ar' ? 'rtl' : 'ltr'}
+            >
               {activeTab === 'basic' && (
                 <>
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u6807\u9898'} *</label>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      {activeLang === 'zh' ? '标题' : activeLang === 'en' ? 'Title' : activeLang === 'es' ? 'Título' : 'العنوان'}
+                      {activeLang === 'zh' ? ' *' : ''}
+                    </label>
                     <Input
-                      value={form.title}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      placeholder={'\u8bf7\u8f93\u5165\u4ea7\u54c1\u6807\u9898'}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u82f1\u6587\u6807\u9898'}</label>
-                    <Input
-                      value={form.titleEn}
-                      onChange={(e) => setForm({ ...form, titleEn: e.target.value })}
-                      placeholder='English title'
+                      value={getLangValue('title', activeLang)}
+                      onChange={(e) => setLangValue('title', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? '请输入产品标题'
+                          : activeLang === 'en'
+                            ? 'Enter product title'
+                            : activeLang === 'es'
+                              ? 'Ingrese el título del producto'
+                              : 'أدخل عنوان المنتج'
+                      }
+                      required={activeLang === 'zh'}
                     />
                   </div>
 
@@ -380,25 +622,25 @@ export default function ProductsAdminPage() {
                     <Input
                       value={form.slug}
                       onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                      placeholder='URL \u6807\u8bc6\uff0c\u5982: hydraulic-press'
+                      placeholder='URL 标识，如: hydraulic-press'
                       required
                     />
                   </div>
 
                   <div className='grid grid-cols-2 gap-4'>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u72b6\u6001'}</label>
+                      <label className='block text-sm font-medium text-gray-700 mb-1'>{'状态'}</label>
                       <select
                         value={form.status}
                         onChange={(e) => setForm({ ...form, status: e.target.value })}
                         className={selectCls}
                       >
-                        <option value='ACTIVE'>{'\u5df2\u53d1\u5e03'}</option>
-                        <option value='INACTIVE'>{'\u672a\u53d1\u5e03'}</option>
+                        <option value='ACTIVE'>{'已发布'}</option>
+                        <option value='INACTIVE'>{'未发布'}</option>
                       </select>
                     </div>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u6392\u5e8f'}</label>
+                      <label className='block text-sm font-medium text-gray-700 mb-1'>{'排序'}</label>
                       <Input
                         type='number'
                         value={form.sortOrder}
@@ -408,129 +650,24 @@ export default function ProductsAdminPage() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u6458\u8981'}</label>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      {activeLang === 'zh' ? '摘要' : activeLang === 'en' ? 'Summary' : activeLang === 'es' ? 'Resumen' : 'الملخص'}
+                    </label>
                     <textarea
-                      value={form.summary}
-                      onChange={(e) => setForm({ ...form, summary: e.target.value })}
-                      placeholder={'\u7b80\u77ed\u63cf\u8ff0'}
+                      value={getLangValue('summary', activeLang)}
+                      onChange={(e) => setLangValue('summary', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? '简短描述'
+                          : activeLang === 'en'
+                            ? 'Short description'
+                            : activeLang === 'es'
+                              ? 'Descripción breve'
+                              : 'وصف مختصر'
+                      }
                       rows={3}
                       className={inputCls}
                     />
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u5c01\u9762\u56fe\u7247'}</label>
-                    <div className='space-y-2'>
-                      <div className='flex items-center gap-2'>
-                        <label className='inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent cursor-pointer'>
-                          <Upload className='w-4 h-4' />
-                          {uploading ? '\u4e0a\u4f20\u4e2d...' : '\u9009\u62e9\u6587\u4ef6'}
-                          <input
-                            type='file'
-                            accept='image/*'
-                            onChange={handleCoverUpload}
-                            disabled={uploading}
-                            className='hidden'
-                          />
-                        </label>
-                        <Input
-                          value={form.coverImage}
-                          onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-                          placeholder={'\u6216\u624b\u52a8\u8f93\u5165\u56fe\u7247 URL'}
-                          className='flex-1'
-                        />
-                      </div>
-                      {form.coverImage && (
-                        <img src={form.coverImage} alt='cover' className='w-32 h-20 object-cover rounded-md border border-gray-200' />
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u4ea7\u54c1\u56fe\u96c6'}</label>
-                    <div className='space-y-2'>
-                      <label className='inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent cursor-pointer'>
-                        <Upload className='w-4 h-4' />
-                        {uploading ? '\u4e0a\u4f20\u4e2d...' : '\u6dfb\u52a0\u56fe\u7247'}
-                        <input
-                          type='file'
-                          accept='image/*'
-                          multiple
-                          onChange={handleGalleryUpload}
-                          disabled={uploading}
-                          className='hidden'
-                        />
-                      </label>
-                      {form.gallery.length > 0 && (
-                        <div className='flex flex-wrap gap-2'>
-                          {form.gallery.map((url, index) => (
-                            <div key={index} className='relative group'>
-                              <img src={url} alt={'gallery-' + (index + 1)} className='w-24 h-16 object-cover rounded-md border border-gray-200' />
-                              <button
-                                type='button'
-                                onClick={() => removeGalleryImage(index)}
-                                className='absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
-                              >
-                                <X className='w-3 h-3' />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className='border-t border-gray-200 pt-4'>
-                    <h4 className='text-sm font-medium text-gray-900 mb-3'>{'\u4ef7\u683c\u8bbe\u7f6e'}</h4>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u4ef7\u683c\u7b56\u7565'}</label>
-                        <select
-                          value={form.priceStrategy}
-                          onChange={(e) => setForm({ ...form, priceStrategy: e.target.value })}
-                          className={selectCls}
-                        >
-                          <option value='CONTACT'>{'\u8054\u7cfb\u8be2\u4ef7'}</option>
-                          <option value='EXACT'>{'\u56fa\u5b9a\u4ef7\u683c'}</option>
-                          <option value='RANGE'>{'\u4ef7\u683c\u533a\u95f4'}</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u4ef7\u683c'}</label>
-                        <Input
-                          type='number'
-                          step='0.01'
-                          value={form.price}
-                          onChange={(e) => setForm({ ...form, price: e.target.value })}
-                          disabled={form.priceStrategy === 'CONTACT'}
-                          placeholder='0.00'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-4 mt-4'>
-                      <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u4ef7\u683c\u5355\u4f4d'}</label>
-                        <Input
-                          value={form.priceUnit}
-                          onChange={(e) => setForm({ ...form, priceUnit: e.target.value })}
-                          placeholder={'\u5982: \u53f0/\u5957'}
-                          disabled={form.priceStrategy === 'CONTACT'}
-                        />
-                      </div>
-                      <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u8d27\u5e01'}</label>
-                        <select
-                          value={form.priceCurrency}
-                          onChange={(e) => setForm({ ...form, priceCurrency: e.target.value })}
-                          className={selectCls}
-                          disabled={form.priceStrategy === 'CONTACT'}
-                        >
-                          <option value='USD'>USD</option>
-                          <option value='CNY'>CNY</option>
-                          <option value='EUR'>EUR</option>
-                        </select>
-                      </div>
-                    </div>
                   </div>
                 </>
               )}
@@ -538,22 +675,28 @@ export default function ProductsAdminPage() {
               {activeTab === 'content' && (
                 <>
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u8be6\u7ec6\u63cf\u8ff0'}</label>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      {activeLang === 'zh'
+                        ? '详细描述'
+                        : activeLang === 'en'
+                          ? 'Detailed Description'
+                          : activeLang === 'es'
+                            ? 'Descripción Detallada'
+                            : 'الوصف التفصيلي'}
+                    </label>
                     <textarea
-                      value={form.description}
-                      onChange={(e) => setForm({ ...form, description: e.target.value })}
-                      placeholder={'\u4ea7\u54c1\u8be6\u7ec6\u4ecb\u7ecd'}
-                      rows={8}
-                      className={inputCls}
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'\u82f1\u6587\u8be6\u7ec6\u63cf\u8ff0'}</label>
-                    <textarea
-                      value={form.descriptionEn}
-                      onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
-                      placeholder='Detailed product description in English'
-                      rows={8}
+                      value={getLangValue('description', activeLang)}
+                      onChange={(e) => setLangValue('description', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? '产品详细介绍'
+                          : activeLang === 'en'
+                            ? 'Detailed product description'
+                            : activeLang === 'es'
+                              ? 'Descripción detallada del producto'
+                              : 'وصف تفصيلي للمنتج'
+                      }
+                      rows={12}
                       className={inputCls}
                     />
                   </div>
@@ -562,20 +705,57 @@ export default function ProductsAdminPage() {
 
               {activeTab === 'seo' && (
                 <>
+                  <div className='flex items-center justify-between mb-2'>
+                    <p className='text-sm text-gray-500'>
+                      {activeLang === 'zh'
+                        ? '当前语言：中文'
+                        : activeLang === 'en'
+                          ? 'Current language: English'
+                          : activeLang === 'es'
+                            ? 'Idioma actual: Español'
+                            : 'اللغة الحالية: العربية'}
+                    </p>
+                    <button
+                      type='button'
+                      onClick={handleAiGenerateSeo}
+                      disabled={generatingSeo}
+                      className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-emerald-200'
+                    >
+                      <Sparkles className='w-3.5 h-3.5' />
+                      {generatingSeo ? 'AI 生成中...' : '✨ AI 自动生成 SEO'}
+                    </button>
+                  </div>
+
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>SEO Title</label>
                     <Input
-                      value={form.seoTitle}
-                      onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
-                      placeholder='SEO \u6807\u9898'
+                      value={getLangValue('seoTitle', activeLang)}
+                      onChange={(e) => setLangValue('seoTitle', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? 'SEO 标题'
+                          : activeLang === 'en'
+                            ? 'SEO Title'
+                            : activeLang === 'es'
+                              ? 'Título SEO'
+                              : 'عنوان SEO'
+                      }
                     />
                   </div>
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>SEO Description</label>
                     <textarea
-                      value={form.seoDescription}
-                      onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
-                      placeholder='SEO \u63cf\u8ff0'
+                      value={getLangValue('seoDescription', activeLang)}
+                      onChange={(e) => setLangValue('seoDescription', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? 'SEO 描述'
+                          : activeLang === 'en'
+                            ? 'SEO Description'
+                            : activeLang === 'es'
+                              ? 'Descripción SEO'
+                              : 'وصف SEO'
+                      }
                       rows={4}
                       className={inputCls}
                     />
@@ -583,9 +763,17 @@ export default function ProductsAdminPage() {
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>SEO Keywords</label>
                     <Input
-                      value={form.seoKeywords}
-                      onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })}
-                      placeholder={'\u5173\u952e\u8bcd\uff0c\u9017\u53f7\u5206\u9694'}
+                      value={getLangValue('seoKeywords', activeLang)}
+                      onChange={(e) => setLangValue('seoKeywords', activeLang, e.target.value)}
+                      placeholder={
+                        activeLang === 'zh'
+                          ? '关键词，逗号分隔'
+                          : activeLang === 'en'
+                            ? 'Keywords, comma separated'
+                            : activeLang === 'es'
+                              ? 'Palabras clave, separadas por comas'
+                              : 'الكلمات الرئيسية، مفصولة بفواصل'
+                      }
                     />
                   </div>
                 </>

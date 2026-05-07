@@ -99,6 +99,8 @@ model SiteConfig {
   id              String  @id @default(cuid())
   companyName     String  @map("company_name")
   companyNameEn   String? @map("company_name_en")
+  companyNameEs   String? @map("company_name_es")
+  companyNameAr   String? @map("company_name_ar")
   logo            String?
   primaryColor    String  @default("#0ea5e9") @map("primary_color")
   secondaryColor  String  @default("#f59e0b") @map("secondary_color")
@@ -115,13 +117,22 @@ model SiteConfig {
 
   socialLinks Json? @map("social_links")
 
-  defaultLanguage String @default("zh") @map("default_language")
+  defaultLanguage String @default("en") @map("default_language")
 
   defaultSeoTitle       String? @map("default_seo_title")
   defaultSeoDescription String? @map("default_seo_description") @db.Text
   defaultSeoKeywords    String? @map("default_seo_keywords")
   defaultOgImage        String? @map("default_og_image")
   favicon               String?
+
+  // AI Configuration
+  aiEnabled   Boolean @default(false) @map("ai_enabled")
+  aiProvider  String? @map("ai_provider")
+  aiApiKey    String? @map("ai_api_key")
+  aiModel     String? @map("ai_model")
+  aiEndpoint  String? @map("ai_endpoint")
+
+  // Company & Contact (per-language, stored in SiteSeoConfig)
 
   currentTemplateId String? @map("current_template_id")
 
@@ -131,6 +142,32 @@ model SiteConfig {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("site_config")
+}
+
+// ==================== 3b. Site SEO Config (multi-language) ====================
+
+model SiteSeoConfig {
+  id                    String  @id @default(cuid())
+  languageCode          String  @map("language_code")
+  companyName           String? @map("company_name")
+  siteTitle             String? @map("site_title")
+  siteDescription       String? @map("site_description") @db.Text
+  defaultSeoTitle       String? @map("default_seo_title")
+  defaultSeoDescription String? @map("default_seo_description") @db.Text
+  defaultSeoKeywords    String? @map("default_seo_keywords")
+  defaultOgImage        String? @map("default_og_image")
+  favicon               String?
+
+  // Contact info (per-language)
+  address               String? @db.Text
+  phone                 String?
+  email                 String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([languageCode])
+  @@map("site_seo_configs")
 }
 
 // ==================== 4. Page ====================
@@ -148,7 +185,15 @@ model Page {
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description") @db.Text
   seoKeywords    String? @map("seo_keywords")
-  canonicalUrl   String? @map("canonical_url")
+  seoTitleEn       String? @map("seo_title_en")
+  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoKeywordsEn    String? @map("seo_keywords_en")
+  seoTitleEs       String? @map("seo_title_es")
+  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoKeywordsEs    String? @map("seo_keywords_es")
+  seoTitleAr       String? @map("seo_title_ar")
+  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
   schemaOrg      Json?   @map("schema_org")
 
@@ -206,15 +251,21 @@ model ServiceItem {
   id          String   @id @default(cuid())
   title       String
   titleEn     String?  @map("title_en")
+  titleEs     String?  @map("title_es")
+  titleAr     String?  @map("title_ar")
   slug        String   @unique
   summary     String?  @db.Text
   summaryEn   String?  @map("summary_en") @db.Text
+  summaryEs   String?  @map("summary_es") @db.Text
+  summaryAr   String?  @map("summary_ar") @db.Text
 
   coverImage String? @map("cover_image")
   gallery    Json?   @default("[]")
 
   description   String? @db.Text
   descriptionEn String? @map("description_en") @db.Text
+  descriptionEs String? @map("description_es") @db.Text
+  descriptionAr String? @map("description_ar") @db.Text
 
   price         Decimal? @db.Decimal(10, 2)
   priceUnit     String?  @map("price_unit")
@@ -227,6 +278,15 @@ model ServiceItem {
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description") @db.Text
   seoKeywords    String? @map("seo_keywords")
+  seoTitleEn       String? @map("seo_title_en")
+  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoKeywordsEn    String? @map("seo_keywords_en")
+  seoTitleEs       String? @map("seo_title_es")
+  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoKeywordsEs    String? @map("seo_keywords_es")
+  seoTitleAr       String? @map("seo_title_ar")
+  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
 
   orderItems OrderItem[]
@@ -243,13 +303,19 @@ model CaseItem {
   id            String  @id @default(cuid())
   title         String
   titleEn       String? @map("title_en")
+  titleEs       String? @map("title_es")
+  titleAr       String? @map("title_ar")
   slug          String  @unique
   clientName    String? @map("client_name")
   coverImage    String? @map("cover_image")
   summary       String? @db.Text
   summaryEn     String? @map("summary_en") @db.Text
+  summaryEs     String? @map("summary_es") @db.Text
+  summaryAr     String? @map("summary_ar") @db.Text
   description   String? @db.Text
   descriptionEn String? @map("description_en") @db.Text
+  descriptionEs String? @map("description_es") @db.Text
+  descriptionAr String? @map("description_ar") @db.Text
 
   sortOrder Int    @default(0) @map("sort_order")
   status    Status @default(ACTIVE)
@@ -257,6 +323,15 @@ model CaseItem {
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description") @db.Text
   seoKeywords    String? @map("seo_keywords")
+  seoTitleEn       String? @map("seo_title_en")
+  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoKeywordsEn    String? @map("seo_keywords_en")
+  seoTitleEs       String? @map("seo_title_es")
+  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoKeywordsEs    String? @map("seo_keywords_es")
+  seoTitleAr       String? @map("seo_title_ar")
+  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -271,12 +346,18 @@ model NewsItem {
   id        String  @id @default(cuid())
   title     String
   titleEn   String? @map("title_en")
+  titleEs   String? @map("title_es")
+  titleAr   String? @map("title_ar")
   slug      String  @unique
   summary   String? @db.Text
   summaryEn String? @map("summary_en") @db.Text
+  summaryEs String? @map("summary_es") @db.Text
+  summaryAr String? @map("summary_ar") @db.Text
   coverImage String? @map("cover_image")
   content   String? @db.Text
   contentEn String? @map("content_en") @db.Text
+  contentEs String? @map("content_es") @db.Text
+  contentAr String? @map("content_ar") @db.Text
   author    String?
   tags      String[]
 
@@ -286,6 +367,15 @@ model NewsItem {
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description") @db.Text
   seoKeywords    String? @map("seo_keywords")
+  seoTitleEn       String? @map("seo_title_en")
+  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoKeywordsEn    String? @map("seo_keywords_en")
+  seoTitleEs       String? @map("seo_title_es")
+  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoKeywordsEs    String? @map("seo_keywords_es")
+  seoTitleAr       String? @map("seo_title_ar")
+  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
   canonicalUrl   String? @map("canonical_url")
   schemaOrg      Json?   @map("schema_org")
