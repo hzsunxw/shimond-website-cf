@@ -109,6 +109,7 @@ export default function CasesAdminPage() {
   const [activeLang, setActiveLang] = useState('zh')
   const [translating, setTranslating] = useState(false)
   const [generatingSeo, setGeneratingSeo] = useState(false)
+  const [generatingCase, setGeneratingCase] = useState(false)
 
   const fetchCases = useCallback(async () => {
     setLoading(true)
@@ -339,6 +340,66 @@ export default function CasesAdminPage() {
     }
   }
 
+  const handleAiGenerateCase = async () => {
+    const topic = prompt('请输入案例主题或项目类型（留空则由 AI 自行决定）：') || ''
+    const currentTitle = getLangValue('title', activeLang)
+
+    if (!currentTitle.trim() && !topic.trim()) {
+      if (!confirm('未输入主题，AI 将自行决定生成内容。是否继续？')) {
+        return
+      }
+    }
+
+    setGeneratingCase(true)
+    try {
+      const res = await fetch('/api/ai/generate-case', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: topic || undefined,
+          title: currentTitle || undefined,
+          lang: activeLang,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        alert(result.error || result.detail || 'AI 生成失败')
+        return
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        [getLangField('title', activeLang)]: result.title || '',
+        slug: result.slug || prev.slug,
+        clientName: result.clientName || prev.clientName,
+        [getLangField('summary', activeLang)]: result.summary || '',
+        [getLangField('description', activeLang)]: result.description || '',
+        [getLangField('seoTitle', activeLang)]: result.seoTitle || '',
+        [getLangField('seoDescription', activeLang)]: result.seoDescription || '',
+        [getLangField('seoKeywords', activeLang)]: result.seoKeywords || '',
+      }))
+
+      if (result.imageKeywords) {
+        try {
+          const imgRes = await fetch(`/api/unsplash?q=${encodeURIComponent(result.imageKeywords)}`)
+          const imgData = await imgRes.json()
+          if (imgData.success && imgData.photos?.length > 0) {
+            setForm((prev) => ({ ...prev, coverImage: imgData.photos[0].url }))
+          }
+        } catch {
+          // ignore image search errors
+        }
+      }
+
+      alert('AI 案例生成完成！')
+    } catch (err) {
+      console.error('AI generate case error:', err)
+      alert('AI 生成失败')
+    } finally {
+      setGeneratingCase(false)
+    }
+  }
+
   const handleAiGenerateSeo = async () => {
     const title = getLangValue('title', activeLang)
     const summary = getLangValue('summary', activeLang)
@@ -494,15 +555,26 @@ export default function CasesAdminPage() {
                   </button>
                 ))}
               </div>
-              <button
-                type='button'
-                onClick={handleAiTranslate}
-                disabled={translating}
-                className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-purple-200'
-              >
-                <Sparkles className='w-3.5 h-3.5' />
-                {translating ? 'AI 翻译中...' : '🤖 AI 翻译到其他语言'}
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  type='button'
+                  onClick={handleAiGenerateCase}
+                  disabled={generatingCase}
+                  className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-blue-200'
+                >
+                  <Sparkles className='w-3.5 h-3.5' />
+                  {generatingCase ? 'AI 生成中...' : '📝 AI 生成案例'}
+                </button>
+                <button
+                  type='button'
+                  onClick={handleAiTranslate}
+                  disabled={translating}
+                  className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-purple-200'
+                >
+                  <Sparkles className='w-3.5 h-3.5' />
+                  {translating ? 'AI 翻译中...' : '🤖 AI 翻译到其他语言'}
+                </button>
+              </div>
             </div>
 
             <div className='flex border-b border-gray-200'>

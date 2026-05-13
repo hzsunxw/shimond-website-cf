@@ -131,6 +131,7 @@ model SiteConfig {
   aiApiKey    String? @map("ai_api_key")
   aiModel     String? @map("ai_model")
   aiEndpoint  String? @map("ai_endpoint")
+  braveSearchKey String? @map("brave_search_key")
 
   // Company & Contact (per-language, stored in SiteSeoConfig)
 
@@ -360,6 +361,9 @@ model NewsItem {
   contentAr String? @map("content_ar") @db.Text
   author    String?
   tags      String[]
+  tagsEn    String[]  @map("tags_en")
+  tagsEs    String[]  @map("tags_es")
+  tagsAr    String[]  @map("tags_ar")
 
   publishAt DateTime? @map("publish_at")
   status    Status    @default(INACTIVE)

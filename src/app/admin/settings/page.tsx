@@ -23,6 +23,7 @@ interface SiteConfig {
   aiApiKey: string
   aiEndpoint: string
   aiModel: string
+  braveSearchKey: string
 }
 
 export default function SiteConfigPage() {
@@ -37,6 +38,7 @@ export default function SiteConfigPage() {
     aiApiKey: '',
     aiEndpoint: '',
     aiModel: '',
+    braveSearchKey: '',
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -283,6 +285,22 @@ export default function SiteConfigPage() {
                 onChange={(e) => handleChange('aiModel', e.target.value)}
                 placeholder="gpt-4o-mini"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="braveSearchKey">
+                Brave Search API Key（可选，用于新闻热点搜索）
+              </Label>
+              <Input
+                id="braveSearchKey"
+                type="password"
+                value={config.braveSearchKey}
+                onChange={(e) => handleChange('braveSearchKey', e.target.value)}
+                placeholder="BSAxxx..."
+              />
+              <p className="text-xs text-gray-500">
+                申请地址：https://api.search.brave.com/app/keys（免费 2000 次/月）
+              </p>
             </div>
           </CardContent>
         </Card>

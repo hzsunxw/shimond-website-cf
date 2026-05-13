@@ -28,3 +28,36 @@ export function localize(
   }
   return result
 }
+
+/**
+ * 从多语言数据对象中读取当前语言对应的字段值。
+ * 规则：如果 locale 不是 zh，优先取 `${field}${Locale}` 字段；
+ * 若该字段为空/不存在，则回退到默认的 `${field}`（中文）。
+ */
+export function getLocalizedValue<T extends Record<string, any>>(
+  item: T,
+  locale: string,
+  field: string
+): string | null | undefined {
+  if (locale === 'zh') return item[field]
+  const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
+  const value = item[langField]
+  if (value !== null && value !== undefined && value !== '') return value as string
+  return item[field]
+}
+
+/**
+ * 从多语言数据对象中读取当前语言对应的数组字段值。
+ * 用于 tags 等 String[] 字段。
+ */
+export function getLocalizedArray<T extends Record<string, any>>(
+  item: T,
+  locale: string,
+  field: string
+): any[] | undefined {
+  if (locale === 'zh') return item[field]
+  const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
+  const value = item[langField]
+  if (Array.isArray(value) && value.length > 0) return value
+  return item[field]
+}

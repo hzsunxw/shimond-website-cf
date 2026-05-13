@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue } from '@/lib/i18n'
 import HeroSection from '@/components/site/HeroSection'
 import ProductsSection from '@/components/site/ProductsSection'
 import FeaturesSection from '@/components/site/FeaturesSection'
@@ -20,8 +21,14 @@ async function getHomepageData() {
         select: {
           id: true,
           title: true,
+          titleEn: true,
+          titleEs: true,
+          titleAr: true,
           slug: true,
           summary: true,
+          summaryEn: true,
+          summaryEs: true,
+          summaryAr: true,
           coverImage: true,
         },
       }),
@@ -53,14 +60,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const { products, config } = await getHomepageData()
+  const locale = await getServerLocale()
 
   const displayProducts =
     products.length > 0
-      ? products.map((p: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null }) => ({
+      ? products.map((p: {
+          id: string
+          title: string
+          titleEn: string | null
+          titleEs: string | null
+          titleAr: string | null
+          slug: string
+          summary: string | null
+          summaryEn: string | null
+          summaryEs: string | null
+          summaryAr: string | null
+          coverImage: string | null
+        }) => ({
           id: p.id,
-          title: p.title,
+          title: getLocalizedValue(p, locale, 'title') || p.title,
           slug: p.slug,
-          summary: p.summary || '',
+          summary: getLocalizedValue(p, locale, 'summary') || p.summary || '',
           coverImage: p.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop',
           tags: ['High Quality', 'Customizable'],
         }))

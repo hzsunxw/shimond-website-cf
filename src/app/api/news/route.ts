@@ -40,6 +40,9 @@ export async function POST(request: Request) {
         contentAr: data.contentAr || null,
         author: data.author || null,
         tags: data.tags || [],
+        tagsEn: data.tagsEn || [],
+        tagsEs: data.tagsEs || [],
+        tagsAr: data.tagsAr || [],
         publishAt: data.publishAt ? new Date(data.publishAt) : null,
         status: data.status || 'ACTIVE',
         seoTitle: data.seoTitle || null,
@@ -82,43 +85,33 @@ export async function PUT(request: Request) {
       )
     }
 
+    const updateData: Record<string, unknown> = {}
+
+    const fields = [
+      'title', 'slug', 'titleEn', 'titleEs', 'titleAr',
+      'summary', 'summaryEn', 'summaryEs', 'summaryAr',
+      'coverImage', 'content', 'contentEn', 'contentEs', 'contentAr',
+      'author', 'tags', 'tagsEn', 'tagsEs', 'tagsAr', 'status',
+      'seoTitle', 'seoDescription', 'seoKeywords',
+      'seoTitleEn', 'seoDescriptionEn', 'seoKeywordsEn',
+      'seoTitleEs', 'seoDescriptionEs', 'seoKeywordsEs',
+      'seoTitleAr', 'seoDescriptionAr', 'seoKeywordsAr',
+      'ogImage', 'canonicalUrl', 'schemaOrg',
+    ]
+
+    for (const field of fields) {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field]
+      }
+    }
+
+    if (data.publishAt !== undefined) {
+      updateData.publishAt = data.publishAt ? new Date(data.publishAt) : null
+    }
+
     const news = await prisma.newsItem.update({
       where: { id: data.id },
-      data: {
-        title: data.title,
-        slug: data.slug,
-        titleEn: data.titleEn || null,
-        titleEs: data.titleEs || null,
-        titleAr: data.titleAr || null,
-        summary: data.summary || null,
-        summaryEn: data.summaryEn || null,
-        summaryEs: data.summaryEs || null,
-        summaryAr: data.summaryAr || null,
-        coverImage: data.coverImage || null,
-        content: data.content || null,
-        contentEn: data.contentEn || null,
-        contentEs: data.contentEs || null,
-        contentAr: data.contentAr || null,
-        author: data.author || null,
-        tags: data.tags || [],
-        publishAt: data.publishAt ? new Date(data.publishAt) : null,
-        status: data.status || 'ACTIVE',
-        seoTitle: data.seoTitle || null,
-        seoDescription: data.seoDescription || null,
-        seoKeywords: data.seoKeywords || null,
-        seoTitleEn: data.seoTitleEn || null,
-        seoDescriptionEn: data.seoDescriptionEn || null,
-        seoKeywordsEn: data.seoKeywordsEn || null,
-        seoTitleEs: data.seoTitleEs || null,
-        seoDescriptionEs: data.seoDescriptionEs || null,
-        seoKeywordsEs: data.seoKeywordsEs || null,
-        seoTitleAr: data.seoTitleAr || null,
-        seoDescriptionAr: data.seoDescriptionAr || null,
-        seoKeywordsAr: data.seoKeywordsAr || null,
-        ogImage: data.ogImage || null,
-        canonicalUrl: data.canonicalUrl || null,
-        schemaOrg: data.schemaOrg || undefined,
-      },
+      data: updateData,
     })
 
     return NextResponse.json(news)

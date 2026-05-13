@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { ArrowRight, Calendar, User } from 'lucide-react'
+import { ArrowRight, Calendar, User, Tag } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue, getLocalizedArray } from '@/lib/i18n'
 
 async function getNewsItem(slug: string) {
   try {
@@ -25,10 +26,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!newsItem) {
     return { title: t('notFound') }
   }
+  const title = getLocalizedValue(newsItem, locale, 'title') || newsItem.title
+  const summary = getLocalizedValue(newsItem, locale, 'summary') || newsItem.summary
+  const seoTitle = getLocalizedValue(newsItem, locale, 'seoTitle') || newsItem.seoTitle
+  const seoDescription = getLocalizedValue(newsItem, locale, 'seoDescription') || newsItem.seoDescription
+  const seoKeywords = getLocalizedValue(newsItem, locale, 'seoKeywords') || newsItem.seoKeywords
   return {
-    title: newsItem.seoTitle || `${newsItem.title} - Shimond`,
-    description: newsItem.seoDescription || newsItem.summary || seo?.defaultSeoDescription || undefined,
-    keywords: newsItem.seoKeywords || seo?.defaultSeoKeywords || undefined,
+    title: seoTitle || `${title} - Shimond`,
+    description: seoDescription || summary || seo?.defaultSeoDescription || undefined,
+    keywords: seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 
@@ -50,6 +56,10 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
     notFound()
   }
 
+  const title = getLocalizedValue(newsItem, locale, 'title') || newsItem.title
+  const summary = getLocalizedValue(newsItem, locale, 'summary') || newsItem.summary
+  const content = getLocalizedValue(newsItem, locale, 'content') || newsItem.content
+
   return (
     <div className="py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,13 +69,13 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
           <ArrowRight className="w-4 h-4" />
           <a href="/news" className="hover:text-sky-500 transition-colors">{t('news')}</a>
           <ArrowRight className="w-4 h-4" />
-          <span className="text-sky-500 font-medium">{newsItem.title}</span>
+          <span className="text-sky-500 font-medium">{title}</span>
         </nav>
 
         <article className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
           {newsItem.coverImage && (
             <div className="aspect-video overflow-hidden">
-              <img src={newsItem.coverImage} alt={newsItem.title} className="w-full h-full object-cover" />
+              <img src={newsItem.coverImage} alt={title} className="w-full h-full object-cover" />
             </div>
           )}
           <div className="p-8 md:p-12">
@@ -84,12 +94,27 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
               )}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{newsItem.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{title}</h1>
 
-            {newsItem.summary && <p className="text-lg text-gray-600 mb-8 font-medium">{newsItem.summary}</p>}
+            {(() => {
+              const itemTags = getLocalizedArray(newsItem, locale, 'tags') || []
+              if (itemTags.length === 0) return null
+              return (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {itemTags.map((tag: string) => (
+                    <span key={tag} className="inline-flex items-center px-3 py-1 rounded-full bg-sky-50 text-sky-600 text-sm">
+                      <Tag className="w-3 h-3 mr-1" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )
+            })()}
 
-            {newsItem.content && (
-              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap leading-relaxed">{newsItem.content}</div>
+            {summary && <p className="text-lg text-gray-600 mb-8 font-medium">{summary}</p>}
+
+            {content && (
+              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap leading-relaxed">{content}</div>
             )}
           </div>
         </article>

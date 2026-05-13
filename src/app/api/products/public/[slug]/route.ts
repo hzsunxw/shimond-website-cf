@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+function getLocalizedValue(item: Record<string, any>, locale: string, field: string): string | null | undefined {
+  if (locale === 'zh') return item[field]
+  const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
+  const value = item[langField]
+  if (value !== null && value !== undefined && value !== '') return value as string
+  return item[field]
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
   try {
+    const locale = (request.headers.get('x-locale') as string) || 'zh'
+    
     const product = await prisma.serviceItem.findUnique({
       where: { slug: params.slug, status: 'ACTIVE' },
     })
@@ -17,7 +27,17 @@ export async function GET(
       )
     }
     
-    return NextResponse.json(product)
+    const localized = {
+      ...product,
+      title: getLocalizedValue(product, locale, 'title') || product.title,
+      summary: getLocalizedValue(product, locale, 'summary') || product.summary,
+      description: getLocalizedValue(product, locale, 'description') || product.description,
+      seoTitle: getLocalizedValue(product, locale, 'seoTitle') || product.seoTitle,
+      seoDescription: getLocalizedValue(product, locale, 'seoDescription') || product.seoDescription,
+      seoKeywords: getLocalizedValue(product, locale, 'seoKeywords') || product.seoKeywords,
+    }
+    
+    return NextResponse.json(localized)
   } catch (error) {
     console.error('Get public product error:', error)
     return NextResponse.json(

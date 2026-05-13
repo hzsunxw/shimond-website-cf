@@ -1,11 +1,14 @@
 ﻿import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { extractJson } from '@/lib/ai-utils'
 
 interface ProductFields {
   title?: string
   summary?: string
   description?: string
+  content?: string
+  tags?: string
   seoTitle?: string
   seoDescription?: string
   seoKeywords?: string
@@ -28,46 +31,80 @@ const langNames: Record<string, string> = {
   zh: 'Chinese',
 }
 
-function extractJson(content: string): { data: unknown; raw: string } {
-  let cleaned = content
-    .replace(/^\uFEFF/, '')
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .trim()
+function buildSystemPrompt(sourceLangName: string, targetLangName: string): string {
+  return `You are a JSON-only translation engine. Your ONLY output must be a single valid JSON object. Absolutely no other text.
 
-  try {
-    return { data: JSON.parse(cleaned), raw: cleaned.slice(0, 500) }
-  } catch {
-    // ignore
+STRICT RULES:
+1. Output ONLY a valid JSON object. No markdown, no code blocks, no explanations, no thinking tags, no preamble, no apology.
+2. Do NOT repeat these instructions in your output.
+3. All string values must be on a single line with proper escaping (use \\\" for quotes inside strings).
+4. Translate from ${sourceLangName} to ${targetLangName}.
+5. Keep a B2B industrial product website tone.
+6. SEO: title ~50-60 chars, description ~150-160 chars, keywords comma-separated.
+7. If "content" field exists, translate it too (preserve paragraph structure as a single escaped string).
+8. If "tags" field exists, translate each tag individually and keep them comma-separated in one string.
+
+REQUIRED JSON FORMAT (all fields optional depending on input):
+{"title":"...","summary":"...","description":"...","content":"...","tags":"tag1, tag2, tag3","seoTitle":"...","seoDescription":"...","seoKeywords":"..."}`
+}
+
+function buildUserPrompt(fieldsText: string): string {
+  return `Translate the following fields. Output ONLY the JSON object. Do not output any other text.
+
+${fieldsText}`
+}
+
+async function translateSingleLang(
+  openai: OpenAI,
+  model: string,
+  sourceLangName: string,
+  targetLang: string,
+  fieldsText: string
+): Promise<ProductFields> {
+  const targetLangName = langNames[targetLang] || targetLang
+  const systemPrompt = buildSystemPrompt(sourceLangName, targetLangName)
+  const userPrompt = buildUserPrompt(fieldsText)
+
+  const doTranslate = async (attempt: number): Promise<ProductFields> => {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.1,
+      max_tokens: 8000,
+    })
+
+    let content = completion.choices[0]?.message?.content?.trim() || ''
+    // Fallback for reasoning models (e.g. DeepSeek) that may put output in reasoning_content
+    const msg = completion.choices[0]?.message as unknown as Record<string, unknown> | undefined
+    if (!content && msg?.reasoning_content) {
+      const reasoning = String(msg.reasoning_content).trim()
+      if (reasoning) {
+        content = reasoning
+      }
+    }
+
+    console.log(`[AI Translate Product][${targetLang}] attempt=${attempt} length=${content.length} firstChars=${content.slice(0, 100).replace(/\n/g, '\\n')}`)
+
+    const extracted = extractJson(content)
+    return extracted.data as ProductFields
   }
 
-  const codeBlockPatterns = [
-    /```(?:json)?\s*([\s\S]*?)\s*```/,
-    /```\s*([\s\S]*?)\s*```/,
-    /`{3,}\s*([\s\S]*?)\s*`{3,}/,
-  ]
-  for (const pattern of codeBlockPatterns) {
-    const match = cleaned.match(pattern)
-    if (match) {
-      try {
-        return { data: JSON.parse(match[1].trim()), raw: cleaned.slice(0, 500) }
-      } catch {
-        // try next
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await doTranslate(attempt)
+    } catch (err) {
+      console.warn(`[AI Translate Product][${targetLang}] attempt ${attempt} failed:`, err instanceof Error ? err.message : String(err))
+      if (attempt < 3) {
+        // Exponential backoff: 500ms, 1000ms
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
       }
     }
   }
 
-  const firstBrace = cleaned.indexOf('{')
-  const lastBrace = cleaned.lastIndexOf('}')
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    const candidate = cleaned.slice(firstBrace, lastBrace + 1)
-    try {
-      return { data: JSON.parse(candidate), raw: cleaned.slice(0, 500) }
-    } catch {
-      // ignore
-    }
-  }
-
-  throw new Error('无法从 AI 响应中提取有效 JSON')
+  throw new Error(`[${targetLang}] 3 次尝试后仍无法解析 AI 响应`)
 }
 
 export async function POST(request: Request) {
@@ -97,61 +134,29 @@ export async function POST(request: Request) {
 
     const model = siteConfig.aiModel || 'gpt-4o-mini'
     const sourceLangName = langNames[sourceLang] || sourceLang
-    const targetLangNames = targetLangs.map((l) => langNames[l] || l).join(', ')
 
     const fieldsText = Object.entries(fields)
       .filter(([, v]) => v && String(v).trim())
       .map(([k, v]) => `${k}: ${v}`)
       .join('\n')
 
-    const systemPrompt = `You are a professional product content and SEO translation expert. Translate the given product fields from ${sourceLangName} to: ${targetLangNames}.\n\nCRITICAL RULES:\n1. Keep translations natural, professional, and suitable for a B2B industrial product website\n2. For SEO fields: title ~50-60 chars, description ~150-160 chars, keywords comma-separated\n3. Maintain technical accuracy for industrial product terminology\n4. Return ONLY a valid JSON object — NO markdown, NO explanations, NO code blocks\n5. The response must start with { and end with }\n6. Include ALL target languages: ${targetLangNames}\n7. All string values must be properly escaped\n\nEXACT OUTPUT FORMAT:\n{"en":{"title":"...","summary":"...","description":"...","seoTitle":"...","seoDescription":"...","seoKeywords":"..."},"es":{"title":"...","summary":"...","description":"...","seoTitle":"...","seoDescription":"...","seoKeywords":"..."},"ar":{"title":"...","summary":"...","description":"...","seoTitle":"...","seoDescription":"...","seoKeywords":"..."}}`
-
-    const userPrompt = `Translate these product fields from ${sourceLangName}:\n\n${fieldsText}\n\nTarget languages: ${targetLangNames}`
-
-    let completion
-    try {
-      completion = await openai.chat.completions.create({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.1,
-        max_tokens: 4000,
-        response_format: { type: 'json_object' },
-      })
-    } catch (apiError) {
-      const errorMsg = String(apiError)
-      if (
-        errorMsg.includes('response_format') ||
-        errorMsg.includes('400') ||
-        errorMsg.includes('not supported')
-      ) {
-        completion = await openai.chat.completions.create({
+    // 并行翻译每种目标语言，避免单请求 token 超限导致截断
+    const translations = await Promise.all(
+      targetLangs.map(async (targetLang) => {
+        const data = await translateSingleLang(
+          openai,
           model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          temperature: 0.1,
-          max_tokens: 4000,
-        })
-      } else {
-        throw apiError
-      }
-    }
+          sourceLangName,
+          targetLang,
+          fieldsText
+        )
+        return { targetLang, data }
+      })
+    )
 
-    const content = completion.choices[0]?.message?.content?.trim() || ''
-
-    let result: TranslateResponse
-    try {
-      const extracted = extractJson(content)
-      result = extracted.data as TranslateResponse
-    } catch {
-      return NextResponse.json(
-        { error: 'AI 返回的内容无法解析为 JSON', raw: content.slice(0, 2000) },
-        { status: 500 }
-      )
+    const result: TranslateResponse = {}
+    for (const { targetLang, data } of translations) {
+      result[targetLang] = data
     }
 
     return NextResponse.json({ success: true, translations: result })

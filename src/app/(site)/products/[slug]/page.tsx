@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue } from '@/lib/i18n'
 import AddToInquiryButton from '@/components/site/AddToInquiryButton'
 
 const fallbackProducts = [
@@ -59,24 +60,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     return { title: t('notFound') }
   }
 
-  // 根据 locale 读取对应多语言 SEO 字段
-  const getSeoField = (field: 'seoTitle' | 'seoDescription' | 'seoKeywords') => {
-    if (locale === 'zh') return (product as Record<string, unknown>)[field] as string | null
-    const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
-    return (product as Record<string, unknown>)[langField] as string | null
-  }
-
-  // 根据 locale 读取产品标题
-  const getProductTitle = () => {
-    if (locale === 'zh') return product.title
-    const titleField = `title${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
-    return ((product as Record<string, unknown>)[titleField] as string | null) || product.title
-  }
+  const title = getLocalizedValue(product, locale, 'title') || product.title
+  const summary = getLocalizedValue(product, locale, 'summary') || product.summary
+  const seoTitle = getLocalizedValue(product, locale, 'seoTitle') || product.seoTitle
+  const seoDescription = getLocalizedValue(product, locale, 'seoDescription') || product.seoDescription
+  const seoKeywords = getLocalizedValue(product, locale, 'seoKeywords') || product.seoKeywords
 
   return {
-    title: getSeoField('seoTitle') || `${getProductTitle()} - Shimond`,
-    description: getSeoField('seoDescription') || product.summary || seo?.defaultSeoDescription || undefined,
-    keywords: getSeoField('seoKeywords') || seo?.defaultSeoKeywords || undefined,
+    title: seoTitle || `${title} - Shimond`,
+    description: seoDescription || summary || seo?.defaultSeoDescription || undefined,
+    keywords: seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 
@@ -110,16 +103,9 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     notFound()
   }
 
-  // 根据 locale 读取多语言内容
-  const getLocalizedField = (field: 'title' | 'summary' | 'description') => {
-    if (locale === 'zh') return (product as Record<string, unknown>)[field] as string | null
-    const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
-    return ((product as Record<string, unknown>)[langField] as string | null) || (product as Record<string, unknown>)[field] as string | null
-  }
-
-  const productTitle = getLocalizedField('title') || product.title
-  const productSummary = getLocalizedField('summary')
-  const productDescription = getLocalizedField('description')
+  const productTitle = getLocalizedValue(product, locale, 'title') || product.title
+  const productSummary = getLocalizedValue(product, locale, 'summary')
+  const productDescription = getLocalizedValue(product, locale, 'description')
 
   const gallery = Array.isArray(product.gallery) ? (product.gallery as string[]) : []
   const mainImage = product.coverImage || gallery[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop'

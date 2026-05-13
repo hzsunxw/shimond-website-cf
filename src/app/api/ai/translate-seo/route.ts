@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { extractJson } from '@/lib/ai-utils'
 
 interface SeoFields {
   companyName?: string
@@ -29,68 +30,6 @@ const langNames: Record<string, string> = {
   es: 'Spanish',
   ar: 'Arabic',
   zh: 'Chinese',
-}
-
-/**
- * 从 AI 响应文本中提取有效 JSON
- * 处理 DeepSeek 等模型常见的不规范输出
- */
-function extractJson(content: string): { data: unknown; raw: string } {
-  // 去除 BOM、零宽字符、控制字符
-  let cleaned = content
-    .replace(/^\uFEFF/, '') // BOM
-    .replace(/[\u200B-\u200D\uFEFF]/g, '') // 零宽字符
-    .trim()
-
-  // 1. 直接解析
-  try {
-    return { data: JSON.parse(cleaned), raw: cleaned.slice(0, 500) }
-  } catch {
-    // ignore
-  }
-
-  // 2. 提取 ```json ... ``` 或 ``` ... ``` 代码块（支持多种变体）
-  const codeBlockPatterns = [
-    /```(?:json)?\s*([\s\S]*?)\s*```/,
-    /```\s*([\s\S]*?)\s*```/,
-    /`{3,}\s*([\s\S]*?)\s*`{3,}/,
-  ]
-  for (const pattern of codeBlockPatterns) {
-    const match = cleaned.match(pattern)
-    if (match) {
-      try {
-        return { data: JSON.parse(match[1].trim()), raw: cleaned.slice(0, 500) }
-      } catch {
-        // try next pattern
-      }
-    }
-  }
-
-  // 3. 提取最外层 JSON 对象（第一个 { 到最后一个 }）
-  const firstBrace = cleaned.indexOf('{')
-  const lastBrace = cleaned.lastIndexOf('}')
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    const candidate = cleaned.slice(firstBrace, lastBrace + 1)
-    try {
-      return { data: JSON.parse(candidate), raw: cleaned.slice(0, 500) }
-    } catch {
-      // ignore
-    }
-  }
-
-  // 4. 提取最外层 JSON 数组
-  const firstBracket = cleaned.indexOf('[')
-  const lastBracket = cleaned.lastIndexOf(']')
-  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
-    const candidate = cleaned.slice(firstBracket, lastBracket + 1)
-    try {
-      return { data: JSON.parse(candidate), raw: cleaned.slice(0, 500) }
-    } catch {
-      // ignore
-    }
-  }
-
-  throw new Error('无法从 AI 响应中提取有效 JSON')
 }
 
 export async function POST(request: Request) {
@@ -185,7 +124,15 @@ Target languages: ${targetLangNames}`
       }
     }
 
-    const content = completion.choices[0]?.message?.content?.trim() || ''
+    let content = completion.choices[0]?.message?.content?.trim() || ''
+    // Fallback for reasoning models (e.g. DeepSeek) that may put output in reasoning_content
+    const msg = completion.choices[0]?.message as unknown as Record<string, unknown> | undefined
+    if (!content && msg?.reasoning_content) {
+      const reasoning = String(msg.reasoning_content).trim()
+      if (reasoning) {
+        content = reasoning
+      }
+    }
 
     // 尝试解析 JSON
     let result: TranslateResponse

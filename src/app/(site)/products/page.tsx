@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue } from '@/lib/i18n'
 import SectionHeader from '@/components/site/SectionComponents'
 import AddToInquiryButton from '@/components/site/AddToInquiryButton'
 
@@ -16,8 +17,14 @@ async function getProducts() {
       select: {
         id: true,
         title: true,
+        titleEn: true,
+        titleEs: true,
+        titleAr: true,
         slug: true,
         summary: true,
+        summaryEn: true,
+        summaryEs: true,
+        summaryAr: true,
         coverImage: true,
       },
     })
@@ -91,8 +98,8 @@ export default async function ProductsPage() {
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{product.summary || ''}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{getLocalizedValue(product, locale, 'title') || product.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">{getLocalizedValue(product, locale, 'summary') || product.summary || ''}</p>
                 <div className="flex items-center justify-between">
                   <Link
                     href={`/products/${product.slug}`}
@@ -105,9 +112,9 @@ export default async function ProductsPage() {
                     product={{
                       id: product.id,
                       slug: product.slug,
-                      title: product.title,
+                      title: getLocalizedValue(product, locale, 'title') || product.title,
                       coverImage: product.coverImage,
-                      summary: product.summary,
+                      summary: getLocalizedValue(product, locale, 'summary') || product.summary,
                     }}
                     variant="icon"
                   />

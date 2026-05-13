@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+function getLocalizedValue(item: Record<string, any>, locale: string, field: string): string | null | undefined {
+  if (locale === 'zh') return item[field]
+  const langField = `${field}${locale.charAt(0).toUpperCase()}${locale.slice(1)}`
+  const value = item[langField]
+  if (value !== null && value !== undefined && value !== '') return value as string
+  return item[field]
+}
+
 export async function GET(request: Request) {
   try {
     const locale = (request.headers.get('x-locale') as string) || 'zh'
@@ -12,9 +20,13 @@ export async function GET(request: Request) {
         id: true,
         title: true,
         titleEn: true,
+        titleEs: true,
+        titleAr: true,
         slug: true,
         summary: true,
         summaryEn: true,
+        summaryEs: true,
+        summaryAr: true,
         coverImage: true,
         price: true,
         priceUnit: true,
@@ -23,11 +35,10 @@ export async function GET(request: Request) {
       },
     })
     
-    // Localize fields based on locale
     const localized = products.map((product: any) => ({
       ...product,
-      title: locale === 'en' && product.titleEn ? product.titleEn : product.title,
-      summary: locale === 'en' && product.summaryEn ? product.summaryEn : product.summary,
+      title: getLocalizedValue(product, locale, 'title') || product.title,
+      summary: getLocalizedValue(product, locale, 'summary') || product.summary,
     }))
     
     return NextResponse.json(localized)

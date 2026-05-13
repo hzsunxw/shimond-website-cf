@@ -71,40 +71,34 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: '缺少案例 ID' }, { status: 400 })
     }
 
+    const updateData: Record<string, unknown> = {}
+
+    const fields = [
+      'title', 'slug', 'titleEn', 'titleEs', 'titleAr',
+      'clientName', 'coverImage',
+      'summary', 'summaryEn', 'summaryEs', 'summaryAr',
+      'description', 'descriptionEn', 'descriptionEs', 'descriptionAr',
+      'status',
+      'seoTitle', 'seoDescription', 'seoKeywords',
+      'seoTitleEn', 'seoDescriptionEn', 'seoKeywordsEn',
+      'seoTitleEs', 'seoDescriptionEs', 'seoKeywordsEs',
+      'seoTitleAr', 'seoDescriptionAr', 'seoKeywordsAr',
+      'ogImage',
+    ]
+
+    for (const field of fields) {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field]
+      }
+    }
+
+    if (data.sortOrder !== undefined) {
+      updateData.sortOrder = data.sortOrder || 0
+    }
+
     const item = await prisma.caseItem.update({
       where: { id: data.id },
-      data: {
-        title: data.title,
-        slug: data.slug,
-        titleEn: data.titleEn || null,
-        titleEs: data.titleEs || null,
-        titleAr: data.titleAr || null,
-        clientName: data.clientName || null,
-        coverImage: data.coverImage || null,
-        summary: data.summary || null,
-        summaryEn: data.summaryEn || null,
-        summaryEs: data.summaryEs || null,
-        summaryAr: data.summaryAr || null,
-        description: data.description || null,
-        descriptionEn: data.descriptionEn || null,
-        descriptionEs: data.descriptionEs || null,
-        descriptionAr: data.descriptionAr || null,
-        sortOrder: data.sortOrder || 0,
-        status: data.status || 'ACTIVE',
-        seoTitle: data.seoTitle || null,
-        seoDescription: data.seoDescription || null,
-        seoKeywords: data.seoKeywords || null,
-        seoTitleEn: data.seoTitleEn || null,
-        seoDescriptionEn: data.seoDescriptionEn || null,
-        seoKeywordsEn: data.seoKeywordsEn || null,
-        seoTitleEs: data.seoTitleEs || null,
-        seoDescriptionEs: data.seoDescriptionEs || null,
-        seoKeywordsEs: data.seoKeywordsEs || null,
-        seoTitleAr: data.seoTitleAr || null,
-        seoDescriptionAr: data.seoDescriptionAr || null,
-        seoKeywordsAr: data.seoKeywordsAr || null,
-        ogImage: data.ogImage || null,
-      },
+      data: updateData,
     })
 
     return NextResponse.json(item)

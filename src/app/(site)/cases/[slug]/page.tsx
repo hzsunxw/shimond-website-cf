@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue } from '@/lib/i18n'
 
 async function getCase(slug: string) {
   try {
@@ -25,10 +26,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!caseItem) {
     return { title: t('notFound') }
   }
+  const title = getLocalizedValue(caseItem, locale, 'title') || caseItem.title
+  const summary = getLocalizedValue(caseItem, locale, 'summary') || caseItem.summary
+  const seoTitle = getLocalizedValue(caseItem, locale, 'seoTitle') || caseItem.seoTitle
+  const seoDescription = getLocalizedValue(caseItem, locale, 'seoDescription') || caseItem.seoDescription
+  const seoKeywords = getLocalizedValue(caseItem, locale, 'seoKeywords') || caseItem.seoKeywords
   return {
-    title: caseItem.seoTitle || `${caseItem.title} - Shimond`,
-    description: caseItem.seoDescription || caseItem.summary || seo?.defaultSeoDescription || undefined,
-    keywords: caseItem.seoKeywords || seo?.defaultSeoKeywords || undefined,
+    title: seoTitle || `${title} - Shimond`,
+    description: seoDescription || summary || seo?.defaultSeoDescription || undefined,
+    keywords: seoKeywords || seo?.defaultSeoKeywords || undefined,
   }
 }
 
@@ -41,6 +47,10 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
     notFound()
   }
 
+  const title = getLocalizedValue(caseItem, locale, 'title') || caseItem.title
+  const summary = getLocalizedValue(caseItem, locale, 'summary') || caseItem.summary
+  const description = getLocalizedValue(caseItem, locale, 'description') || caseItem.description
+
   return (
     <div className="py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,23 +60,23 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
           <ArrowRight className="w-4 h-4" />
           <a href="/cases" className="hover:text-sky-500 transition-colors">{t('cases')}</a>
           <ArrowRight className="w-4 h-4" />
-          <span className="text-sky-500 font-medium">{caseItem.title}</span>
+          <span className="text-sky-500 font-medium">{title}</span>
         </nav>
 
         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
           {caseItem.coverImage && (
             <div className="aspect-video overflow-hidden">
-              <img src={caseItem.coverImage} alt={caseItem.title} className="w-full h-full object-cover" />
+              <img src={caseItem.coverImage} alt={title} className="w-full h-full object-cover" />
             </div>
           )}
           <div className="p-8 md:p-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{caseItem.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{title}</h1>
             {caseItem.clientName && (
               <p className="text-sky-500 font-medium mb-6">{t('case.client')}: {caseItem.clientName}</p>
             )}
-            {caseItem.summary && <p className="text-lg text-gray-600 mb-8">{caseItem.summary}</p>}
-            {caseItem.description && (
-              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{caseItem.description}</div>
+            {summary && <p className="text-lg text-gray-600 mb-8">{summary}</p>}
+            {description && (
+              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{description}</div>
             )}
           </div>
         </div>

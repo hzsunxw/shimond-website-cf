@@ -23,6 +23,9 @@ interface NewsItem {
   contentAr: string | null
   author: string | null
   tags: string[]
+  tagsEn: string[]
+  tagsEs: string[]
+  tagsAr: string[]
   publishAt: string | null
   status: string
   seoTitle: string | null
@@ -60,6 +63,9 @@ const emptyForm = {
   contentAr: '',
   author: '',
   tags: [] as string[],
+  tagsEn: [] as string[],
+  tagsEs: [] as string[],
+  tagsAr: [] as string[],
   publishAt: '',
   status: 'ACTIVE',
   seoTitle: '',
@@ -108,6 +114,9 @@ export default function NewsAdminPage() {
   const [activeLang, setActiveLang] = useState('zh')
   const [translating, setTranslating] = useState(false)
   const [generatingSeo, setGeneratingSeo] = useState(false)
+  const [generatingNews, setGeneratingNews] = useState(false)
+  const [generatedPhotos, setGeneratedPhotos] = useState<{ id: string; url: string; thumb: string; alt: string }[]>([])
+  const [showImagePicker, setShowImagePicker] = useState(false)
 
   const fetchNews = useCallback(async () => {
     setLoading(true)
@@ -155,6 +164,9 @@ export default function NewsAdminPage() {
       contentAr: item.contentAr || '',
       author: item.author || '',
       tags: Array.isArray(item.tags) ? item.tags : [],
+      tagsEn: Array.isArray(item.tagsEn) ? item.tagsEn : [],
+      tagsEs: Array.isArray(item.tagsEs) ? item.tagsEs : [],
+      tagsAr: Array.isArray(item.tagsAr) ? item.tagsAr : [],
       publishAt: item.publishAt ? item.publishAt.slice(0, 10) : '',
       status: item.status,
       seoTitle: item.seoTitle || '',
@@ -263,6 +275,9 @@ export default function NewsAdminPage() {
         contentAr: form.contentAr || null,
         author: form.author || null,
         tags: form.tags,
+        tagsEn: form.tagsEn,
+        tagsEs: form.tagsEs,
+        tagsAr: form.tagsAr,
         publishAt: form.publishAt ? new Date(form.publishAt).toISOString() : null,
         status: form.status,
         seoTitle: form.seoTitle || null,
@@ -290,6 +305,7 @@ export default function NewsAdminPage() {
         body: JSON.stringify(body),
       })
       if (res.ok) {
+        alert('新闻已保存')
         closeModal()
         fetchNews()
       } else {
@@ -330,6 +346,77 @@ export default function NewsAdminPage() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleAiGenerateNews = async () => {
+    const topic = prompt('请输入新闻主题或关键词（留空则由 AI 自行决定）：') || ''
+    const currentTitle = getLangValue('title', activeLang)
+
+    if (!currentTitle.trim() && !topic.trim()) {
+      if (!confirm('未输入主题，AI 将自行决定生成内容。是否继续？')) {
+        return
+      }
+    }
+
+    setGeneratingNews(true)
+    try {
+      const res = await fetch('/api/ai/generate-news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: topic || undefined,
+          title: currentTitle || undefined,
+          lang: activeLang,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        alert(result.error || result.detail || 'AI 生成失败')
+        return
+      }
+
+      setForm((prev) => {
+        const suffix = activeLang === 'zh' ? '' : capitalize(activeLang)
+        return {
+          ...prev,
+          [getLangField('title', activeLang)]: result.title || '',
+          slug: result.slug || prev.slug,
+          [getLangField('summary', activeLang)]: result.summary || '',
+          [getLangField('content', activeLang)]: result.content || '',
+          [`tags${suffix}`]: Array.isArray(result.tags) ? result.tags : (prev as Record<string, unknown>)[`tags${suffix}`] as string[] || [],
+          author: prev.author || 'Shimond编辑部',
+          publishAt: prev.publishAt || new Date().toISOString().slice(0, 10),
+          [getLangField('seoTitle', activeLang)]: result.seoTitle || '',
+          [getLangField('seoDescription', activeLang)]: result.seoDescription || '',
+          [getLangField('seoKeywords', activeLang)]: result.seoKeywords || '',
+        }
+      })
+
+      if (result.imageKeywords) {
+        try {
+          const imgRes = await fetch(`/api/unsplash?q=${encodeURIComponent(result.imageKeywords)}`)
+          const imgData = await imgRes.json()
+          if (imgData.success && imgData.photos?.length > 0) {
+            setGeneratedPhotos(imgData.photos)
+            setShowImagePicker(true)
+          }
+        } catch {
+          // ignore image search errors
+        }
+      }
+
+      alert('AI 新闻生成完成！请检查内容并选择封面图片。')
+    } catch (err) {
+      console.error('AI generate news error:', err)
+      alert('AI 生成失败')
+    } finally {
+      setGeneratingNews(false)
+    }
+  }
+
+  const handleSelectImage = (url: string) => {
+    setForm((prev) => ({ ...prev, coverImage: url }))
+    setShowImagePicker(false)
+  }
+
   const handleAiTranslate = async () => {
     const targetLangs = languages.filter((l) => l.code !== activeLang).map((l) => l.code)
     const fields: Record<string, string> = {}
@@ -347,6 +434,12 @@ export default function NewsAdminPage() {
       if (value?.trim()) {
         fields[key] = value
       }
+    }
+
+    // tags 是数组，需要 join 成逗号分隔字符串传给 API
+    const currentTags = ((form as unknown) as Record<string, string[]>)[getLangField('tags', activeLang)]
+    if (Array.isArray(currentTags) && currentTags.length > 0) {
+      fields.tags = currentTags.join(', ')
     }
 
     if (Object.keys(fields).length === 0) {
@@ -376,7 +469,7 @@ export default function NewsAdminPage() {
       }
 
       const newForm = { ...form }
-      const formRec = (newForm as unknown) as Record<string, string>
+      const formRec = (newForm as unknown) as Record<string, string | string[]>
       for (const lang of targetLangs) {
         const trans = result.translations[lang]
         if (!trans) continue
@@ -387,6 +480,12 @@ export default function NewsAdminPage() {
         if (trans.seoTitle) formRec[`seoTitle${suffix}`] = trans.seoTitle
         if (trans.seoDescription) formRec[`seoDescription${suffix}`] = trans.seoDescription
         if (trans.seoKeywords) formRec[`seoKeywords${suffix}`] = trans.seoKeywords
+        if (trans.tags) {
+          formRec[`tags${suffix}`] = String(trans.tags)
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        }
       }
       setForm(newForm)
       alert('AI 翻译完成！已填充到其他语言，请检查。')
@@ -464,7 +563,7 @@ export default function NewsAdminPage() {
       </header>
 
       <div className='p-8'>
-        <div className='bg-white rounded-lg shadow overflow-hidden'>
+        <div className='bg-white rounded-lg shadow overflow-x-auto'>
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
@@ -549,6 +648,15 @@ export default function NewsAdminPage() {
                   </button>
                 ))}
               </div>
+              <button
+                type='button'
+                onClick={handleAiGenerateNews}
+                disabled={generatingNews}
+                className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-blue-200'
+              >
+                <Sparkles className='w-3.5 h-3.5' />
+                {generatingNews ? 'AI 生成中...' : '📝 AI 生成新闻'}
+              </button>
               <button
                 type='button'
                 onClick={handleAiTranslate}
@@ -648,8 +756,17 @@ export default function NewsAdminPage() {
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-1'>标签</label>
                       <Input
-                        value={form.tags.join(', ')}
-                        onChange={(e) => setForm({ ...form, tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+                        value={(() => {
+                          const arr = ((form as unknown) as Record<string, string[]>)[getLangField('tags', activeLang)]
+                          return Array.isArray(arr) ? arr.join(', ') : ''
+                        })()}
+                        onChange={(e) => {
+                          const field = getLangField('tags', activeLang)
+                          setForm((prev) => ({
+                            ...prev,
+                            [field]: e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
+                          }))
+                        }}
                         placeholder='标签1, 标签2, 标签3'
                       />
                     </div>
@@ -707,6 +824,38 @@ export default function NewsAdminPage() {
                       placeholder='https://example.com/image.jpg'
                     />
                   </div>
+
+                  {showImagePicker && generatedPhotos.length > 0 && (
+                    <div className='border border-gray-200 rounded-lg p-4 bg-gray-50'>
+                      <div className='flex items-center justify-between mb-3'>
+                        <label className='text-sm font-medium text-gray-700'>AI 推荐封面图片（点击选择）</label>
+                        <button
+                          type='button'
+                          onClick={() => setShowImagePicker(false)}
+                          className='text-gray-400 hover:text-gray-600'
+                        >
+                          <X className='w-4 h-4' />
+                        </button>
+                      </div>
+                      <div className='grid grid-cols-4 gap-3'>
+                        {generatedPhotos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            type='button'
+                            onClick={() => handleSelectImage(photo.url)}
+                            className='relative group rounded-lg overflow-hidden border-2 border-transparent hover:border-sky-500 transition-colors'
+                          >
+                            <img
+                              src={photo.thumb}
+                              alt={photo.alt}
+                              className='w-full h-20 object-cover'
+                            />
+                            <div className='absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors' />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 

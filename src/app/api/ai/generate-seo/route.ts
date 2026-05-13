@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { extractJson } from '@/lib/ai-utils'
 
 interface GenerateRequest {
   title: string
@@ -20,48 +21,6 @@ const langNames: Record<string, string> = {
   es: 'Spanish',
   ar: 'Arabic',
   zh: 'Chinese',
-}
-
-function extractJson(content: string): { data: unknown; raw: string } {
-  let cleaned = content
-    .replace(/^\uFEFF/, '')
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .trim()
-
-  try {
-    return { data: JSON.parse(cleaned), raw: cleaned.slice(0, 500) }
-  } catch {
-    // ignore
-  }
-
-  const codeBlockPatterns = [
-    /```(?:json)?\s*([\s\S]*?)\s*```/,
-    /```\s*([\s\S]*?)\s*```/,
-    /`{3,}\s*([\s\S]*?)\s*`{3,}/,
-  ]
-  for (const pattern of codeBlockPatterns) {
-    const match = cleaned.match(pattern)
-    if (match) {
-      try {
-        return { data: JSON.parse(match[1].trim()), raw: cleaned.slice(0, 500) }
-      } catch {
-        // try next
-      }
-    }
-  }
-
-  const firstBrace = cleaned.indexOf('{')
-  const lastBrace = cleaned.lastIndexOf('}')
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    const candidate = cleaned.slice(firstBrace, lastBrace + 1)
-    try {
-      return { data: JSON.parse(candidate), raw: cleaned.slice(0, 500) }
-    } catch {
-      // ignore
-    }
-  }
-
-  throw new Error('无法从 AI 响应中提取有效 JSON')
 }
 
 export async function POST(request: Request) {
@@ -147,7 +106,15 @@ REQUIRED FORMAT:
       }
     }
 
-    const content = completion.choices[0]?.message?.content?.trim() || ''
+    let content = completion.choices[0]?.message?.content?.trim() || ''
+    // Fallback for reasoning models (e.g. DeepSeek) that may put output in reasoning_content
+    const msg = completion.choices[0]?.message as unknown as Record<string, unknown> | undefined
+    if (!content && msg?.reasoning_content) {
+      const reasoning = String(msg.reasoning_content).trim()
+      if (reasoning) {
+        content = reasoning
+      }
+    }
 
     if (!content) {
       return NextResponse.json(

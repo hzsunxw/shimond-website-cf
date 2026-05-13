@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue } from '@/lib/i18n'
 import SectionHeader from '@/components/site/SectionComponents'
 
 async function getCases() {
@@ -15,10 +16,16 @@ async function getCases() {
       select: {
         id: true,
         title: true,
+        titleEn: true,
+        titleEs: true,
+        titleAr: true,
         slug: true,
         clientName: true,
         coverImage: true,
         summary: true,
+        summaryEn: true,
+        summaryEs: true,
+        summaryAr: true,
       },
     })
     return cases
@@ -94,9 +101,9 @@ export default async function CasesPage() {
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{item.title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{getLocalizedValue(item, locale, 'title') || item.title}</h3>
                 {item.clientName && <p className="text-sm text-sky-500 mb-2">{item.clientName}</p>}
-                <p className="text-gray-600 mb-4 line-clamp-2">{item.summary || ''}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2">{getLocalizedValue(item, locale, 'summary') || item.summary || ''}</p>
                 <Link
                   href={`/cases/${item.slug}`}
                   className="inline-flex items-center space-x-2 text-sky-500 font-semibold hover:text-sky-600 transition-colors"

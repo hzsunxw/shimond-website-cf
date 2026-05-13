@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Calendar } from 'lucide-react'
+import { ArrowRight, Calendar, Tag } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import { getLocalizedValue, getLocalizedArray } from '@/lib/i18n'
 import SectionHeader from '@/components/site/SectionComponents'
 
 async function getNews() {
@@ -15,11 +16,21 @@ async function getNews() {
       select: {
         id: true,
         title: true,
+        titleEn: true,
+        titleEs: true,
+        titleAr: true,
         slug: true,
         summary: true,
+        summaryEn: true,
+        summaryEs: true,
+        summaryAr: true,
         coverImage: true,
         author: true,
         publishAt: true,
+        tags: true,
+        tagsEn: true,
+        tagsEs: true,
+        tagsAr: true,
       },
     })
     return news
@@ -94,7 +105,7 @@ export default async function NewsPage() {
         />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {display.map((item: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null; author: string | null; publishAt: Date | null }) => (
+          {display.map((item: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null; author: string | null; publishAt: Date | null; tags: string[] }) => (
             <div
               key={item.id}
               className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
@@ -102,7 +113,7 @@ export default async function NewsPage() {
               <div className="relative aspect-[3/2] overflow-hidden group">
                 <img
                   src={item.coverImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop'}
-                  alt={item.title}
+                  alt={getLocalizedValue(item, locale, 'title') || item.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
@@ -112,8 +123,27 @@ export default async function NewsPage() {
                   <span>{formatDate(item.publishAt, locale)}</span>
                   {item.author && <span>· {item.author}</span>}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{item.summary || ''}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{getLocalizedValue(item, locale, 'title') || item.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">{getLocalizedValue(item, locale, 'summary') || item.summary || ''}</p>
+                {(() => {
+                  const itemTags = getLocalizedArray(item, locale, 'tags') || []
+                  if (itemTags.length === 0) return null
+                  return (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {itemTags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 text-xs">
+                          <Tag className="w-3 h-3 mr-0.5" />
+                          {tag}
+                        </span>
+                      ))}
+                      {itemTags.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs">
+                          +{itemTags.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })()}
                 <Link
                   href={`/news/${item.slug}`}
                   className="inline-flex items-center space-x-2 text-sky-500 font-semibold hover:text-sky-600 transition-colors"
