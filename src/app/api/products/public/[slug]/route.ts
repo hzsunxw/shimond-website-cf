@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const locale = (request.headers.get('x-locale') as string) || 'zh'
+    const locale = (request.headers.get('x-locale') as string) || 'en'
     
     const product = await prisma.serviceItem.findUnique({
       where: { slug: params.slug, status: 'ACTIVE' },

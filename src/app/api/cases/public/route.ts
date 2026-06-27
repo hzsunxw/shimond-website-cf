@@ -11,7 +11,7 @@ function getLocalizedValue(item: Record<string, any>, locale: string, field: str
 
 export async function GET(request: Request) {
   try {
-    const locale = (request.headers.get('x-locale') as string) || 'zh'
+    const locale = (request.headers.get('x-locale') as string) || 'en'
     
     const cases = await prisma.caseItem.findMany({
       where: { status: 'ACTIVE' },

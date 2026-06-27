@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { ADMIN_PATH } from '@/lib/admin-path'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -31,8 +29,8 @@ export default function LoginPage() {
       }
 
       // 登录成功，跳转到后台
-      router.push(ADMIN_PATH)
-      router.refresh()
+      // 使用全页导航而非 router.push，确保新设置的 cookie 被浏览器携带
+      window.location.href = ADMIN_PATH
     } catch (err) {
       setError('网络错误，请重试')
     } finally {

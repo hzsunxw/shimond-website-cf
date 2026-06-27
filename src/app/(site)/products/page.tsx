@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { isVer4Theme } from '@/lib/theme'
+import Ver4ProductsPage from '@/themes/ver4/ProductsPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -75,6 +78,8 @@ export default async function ProductsPage() {
   const products = await getProducts()
   const display = products.length > 0 ? products : fallbackProducts
 
+  if (isVer4Theme()) return <Ver4ProductsPage locale={locale} products={display} />
+
   return (
     <div className="pt-[5rem] pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,15 +91,17 @@ export default async function ProductsPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {display.map((product: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null }) => (
-            <div
+            <article
               key={product.id}
               className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
             >
               <div className="relative aspect-[4/3] overflow-hidden group">
-                <img
+                <Image
+                  fill
                   src={product.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop'}
                   alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
               <div className="p-6">
@@ -120,7 +127,7 @@ export default async function ProductsPage() {
                   />
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

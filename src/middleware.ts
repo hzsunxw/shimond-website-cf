@@ -1,8 +1,23 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { parseAcceptLanguage } from '@/lib/locale-utils'
 
 const ADMIN_PATH = (process.env.NEXT_PUBLIC_ADMIN_PATH || '/admin').replace(/\/$/, '')
 const LOGIN_PATH = `${ADMIN_PATH}/login`
+
+function detectLocale(request: NextRequest): string {
+  // 1. 优先使用用户主动选择的语言（cookie）
+  const cookie = request.cookies.get('locale')?.value
+  if (cookie) return cookie
+
+  // 2. 根据浏览器 Accept-Language 头自动检测
+  const acceptLanguage = request.headers.get('accept-language') || ''
+  const detected = parseAcceptLanguage(acceptLanguage)
+  if (detected) return detected
+
+  // 3. 兜底默认英文
+  return 'en'
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -23,7 +38,7 @@ export function middleware(request: NextRequest) {
 
   // Add locale header for API routes
   const response = NextResponse.next()
-  const locale = request.cookies.get('locale')?.value || 'zh'
+  const locale = detectLocale(request)
   response.headers.set('x-locale', locale)
 
   return response

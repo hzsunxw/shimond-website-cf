@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
+import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+
+// 上传目录：优先用环境变量，否则回退到项目根目录的 public/uploads
+// standalone 模式下 process.cwd() 是 .next/standalone，需向上回溯两级
+function getUploadsDir() {
+  if (process.env.UPLOADS_DIR) return process.env.UPLOADS_DIR
+  return join(process.cwd(), '..', '..', 'public', 'uploads')
+}
 
 export async function POST(request: Request) {
   try {
@@ -29,12 +36,14 @@ export async function POST(request: Request) {
     const originalName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_')
     const filename = `${timestamp}-${originalName}`
 
-    const uploadDir = join(process.cwd(), 'public', 'uploads')
+    const uploadDir = getUploadsDir()
     const filepath = join(uploadDir, filename)
 
+    // 确保上传目录存在
+    await mkdir(uploadDir, { recursive: true })
     await writeFile(filepath, buffer)
 
-    const url = `/uploads/${filename}`
+    const url = `/api/uploads/${filename}`
     return NextResponse.json({ url })
   } catch (error) {
     console.error('Upload error:', error)

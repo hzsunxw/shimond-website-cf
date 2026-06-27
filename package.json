@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
-    "start": "next start",
+    "start": "node .next/standalone/server.js", 
     "lint": "next lint",
-    "db:generate": "prisma generate",
+    "postbuild": "powershell -Command \"if (Test-Path .next\\static) { Copy-Item -Path '.next/static' -Destination '.next/standalone/.next/static' -Recurse -Force }\"",    "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:create": "prisma migrate dev --create-only",
     "db:deploy": "prisma migrate deploy",

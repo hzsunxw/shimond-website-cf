@@ -94,7 +94,7 @@ export default function SiteFooter({
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/about#contact" className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.customOrders')}
                 </Link>
               </li>
@@ -126,7 +126,7 @@ export default function SiteFooter({
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/about#contact" className="text-gray-400 hover:text-white transition-colors">
                   {t('contact')}
                 </Link>
               </li>
@@ -139,15 +139,15 @@ export default function SiteFooter({
             <ul className="space-y-3 text-gray-400">
               <li className="flex items-start space-x-3">
                 <span className="text-sky-500 mt-0.5">📍</span>
-                <span>{address}</span>
+                <span>{t('about.contact.address')}</span>
               </li>
               <li className="flex items-center space-x-3">
                 <span className="text-sky-500">📞</span>
-                <span>{phone}</span>
+                <span>{t('about.contact.phone')}</span>
               </li>
               <li className="flex items-center space-x-3">
                 <span className="text-sky-500">✉️</span>
-                <span>{email}</span>
+                <span>{t('about.contact.email')}</span>
               </li>
             </ul>
           </div>

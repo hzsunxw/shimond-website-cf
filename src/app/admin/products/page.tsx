@@ -22,6 +22,14 @@ interface Product {
   descriptionEn: string | null
   descriptionEs: string | null
   descriptionAr: string | null
+  features: string[]
+  featuresEn: string[]
+  featuresEs: string[]
+  featuresAr: string[]
+  specs: { label: string; value: string }[]
+  specsEn: { label: string; value: string }[]
+  specsEs: { label: string; value: string }[]
+  specsAr: { label: string; value: string }[]
   price: string | null
   priceUnit: string | null
   priceCurrency: string | null
@@ -60,6 +68,23 @@ const emptyForm = {
   descriptionEn: '',
   descriptionEs: '',
   descriptionAr: '',
+  features: ['防水防潮', '耐磨损', '易清洁', '环保材料', '色彩丰富', '可定制尺寸'],
+  featuresEn: [] as string[],
+  featuresEs: [] as string[],
+  featuresAr: [] as string[],
+  specs: [
+    { label: '材质', value: '100% PVC' },
+    { label: '厚度', value: '0.6mm - 2.0mm' },
+    { label: '宽度', value: '1.37m - 1.5m' },
+    { label: '背衬', value: 'TC布 / 针织布 / 无纺布' },
+    { label: '颜色', value: '可定制' },
+    { label: '最小起订量', value: '1000米' },
+    { label: '克重', value: '' },
+    { label: '密度', value: '' },
+  ],
+  specsEn: [] as { label: string; value: string }[],
+  specsEs: [] as { label: string; value: string }[],
+  specsAr: [] as { label: string; value: string }[],
   price: '',
   priceUnit: '',
   priceCurrency: 'USD',
@@ -155,7 +180,15 @@ export default function ProductsAdminPage() {
       descriptionEn: item.descriptionEn || '',
       descriptionEs: item.descriptionEs || '',
       descriptionAr: item.descriptionAr || '',
-      price: item.price || '',
+        features: Array.isArray(item.features) && item.features.length > 0 ? item.features : emptyForm.features,
+        featuresEn: Array.isArray(item.featuresEn) ? item.featuresEn : [],
+        featuresEs: Array.isArray(item.featuresEs) ? item.featuresEs : [],
+        featuresAr: Array.isArray(item.featuresAr) ? item.featuresAr : [],
+        specs: Array.isArray(item.specs) && item.specs.length > 0 ? item.specs : emptyForm.specs,
+        specsEn: Array.isArray(item.specsEn) ? item.specsEn : [],
+        specsEs: Array.isArray(item.specsEs) ? item.specsEs : [],
+        specsAr: Array.isArray(item.specsAr) ? item.specsAr : [],
+        price: item.price || '',
       priceUnit: item.priceUnit || '',
       priceCurrency: item.priceCurrency || 'USD',
       priceStrategy: item.priceStrategy || 'CONTACT',
@@ -263,6 +296,14 @@ export default function ProductsAdminPage() {
         descriptionEn: form.descriptionEn || null,
         descriptionEs: form.descriptionEs || null,
         descriptionAr: form.descriptionAr || null,
+        features: form.features,
+        featuresEn: form.featuresEn,
+        featuresEs: form.featuresEs,
+        featuresAr: form.featuresAr,
+        specs: form.specs,
+        specsEn: form.specsEn,
+        specsEs: form.specsEs,
+        specsAr: form.specsAr,
         price: form.price ? parseFloat(form.price) : null,
         priceUnit: form.priceUnit || null,
         priceCurrency: form.priceCurrency || 'USD',
@@ -331,6 +372,32 @@ export default function ProductsAdminPage() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  // Get the features array for the active language
+  const getLangFeatures = (): string[] => {
+    const field = `features${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    const arr = (form as unknown as Record<string, string[]>)[field]
+    return Array.isArray(arr) ? arr : []
+  }
+
+  // Get the specs array for the active language
+  const getLangSpecs = (): { label: string; value: string }[] => {
+    const field = `specs${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    const arr = (form as unknown as Record<string, { label: string; value: string }[]>)[field]
+    return Array.isArray(arr) ? arr : []
+  }
+
+  // Set features array for the active language
+  const setLangFeatures = (next: string[]) => {
+    const field = `features${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    setForm((prev) => ({ ...prev, [field]: next }))
+  }
+
+  // Set specs array for the active language
+  const setLangSpecs = (next: { label: string; value: string }[]) => {
+    const field = `specs${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    setForm((prev) => ({ ...prev, [field]: next }))
+  }
+
   const handleAiTranslate = async () => {
     const targetLangs = languages.filter((l) => l.code !== activeLang).map((l) => l.code)
     const fields: Record<string, string> = {}
@@ -348,6 +415,20 @@ export default function ProductsAdminPage() {
       if (value?.trim()) {
         fields[key] = value
       }
+    }
+
+    // Collect features (comma-separated) for the active language
+    const featuresField = `features${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    const featuresArr = (form as unknown as Record<string, string[]>)[featuresField]
+    if (Array.isArray(featuresArr) && featuresArr.length > 0) {
+      fields.features = featuresArr.join(', ')
+    }
+
+    // Collect specs (label: value per line) for the active language
+    const specsField = `specs${activeLang === 'zh' ? '' : capitalize(activeLang)}`
+    const specsArr = (form as unknown as Record<string, { label: string; value: string }[]>)[specsField]
+    if (Array.isArray(specsArr) && specsArr.length > 0) {
+      fields.specs = specsArr.map((s) => `${s.label}: ${s.value}`).join('\n')
     }
 
     if (Object.keys(fields).length === 0) {
@@ -377,7 +458,7 @@ export default function ProductsAdminPage() {
       }
 
       const newForm = { ...form }
-      const formRec = (newForm as unknown) as Record<string, string>
+      const formRec = (newForm as unknown) as Record<string, unknown>
       for (const lang of targetLangs) {
         const trans = result.translations[lang]
         if (!trans) continue
@@ -388,6 +469,18 @@ export default function ProductsAdminPage() {
         if (trans.seoTitle) formRec[`seoTitle${suffix}`] = trans.seoTitle
         if (trans.seoDescription) formRec[`seoDescription${suffix}`] = trans.seoDescription
         if (trans.seoKeywords) formRec[`seoKeywords${suffix}`] = trans.seoKeywords
+        // Parse translated features (comma-separated → array)
+        if (trans.features) {
+          formRec[`features${suffix}`] = trans.features.split(',').map((f: string) => f.trim()).filter(Boolean)
+        }
+        // Parse translated specs ("Label: Value" per line → array of {label, value})
+        if (trans.specs) {
+          formRec[`specs${suffix}`] = trans.specs.split('\n').map((line: string) => {
+            const idx = line.indexOf(': ')
+            if (idx === -1) return { label: line.trim(), value: '' }
+            return { label: line.slice(0, idx).trim(), value: line.slice(idx + 2).trim() }
+          }).filter((s: { label: string }) => s.label)
+        }
       }
       setForm(newForm)
       alert('AI 翻译完成！已填充到其他语言，请检查。')
@@ -596,6 +689,28 @@ export default function ProductsAdminPage() {
             >
               {activeTab === 'basic' && (
                 <>
+                  {/* 封面图片 */}
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'封面图片'}</label>
+                    {form.coverImage && (
+                      <div className='mb-2 relative inline-block'>
+                        <img src={form.coverImage} alt='cover' className='w-48 h-32 object-cover rounded-lg border border-gray-200' />
+                        <button
+                          type='button'
+                          onClick={() => setForm({ ...form, coverImage: '' })}
+                          className='absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-sm flex items-center justify-center hover:bg-red-600'
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    )}
+                    <label className={`inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <Upload className='w-4 h-4' />
+                      {uploading ? '上传中...' : '选择图片'}
+                      <input type='file' accept='image/*' className='hidden' onChange={handleCoverUpload} disabled={uploading} />
+                    </label>
+                  </div>
+
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>
                       {activeLang === 'zh' ? '标题' : activeLang === 'en' ? 'Title' : activeLang === 'es' ? 'Título' : 'العنوان'}
@@ -674,6 +789,101 @@ export default function ProductsAdminPage() {
 
               {activeTab === 'content' && (
                 <>
+                  {/* Features / 特性标签 */}
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      {activeLang === 'zh' ? '产品特性' : activeLang === 'en' ? 'Features' : activeLang === 'es' ? 'Características' : 'الميزات'}
+                    </label>
+                    <div className='flex flex-wrap gap-2 mb-2'>
+                      {getLangFeatures().map((feature, index) => (
+                        <span key={index} className='inline-flex items-center gap-1 px-3 py-1 bg-sky-50 text-sky-700 rounded-full text-sm border border-sky-200'>
+                          {feature}
+                          <button
+                            type='button'
+                            onClick={() => {
+                              const next = [...getLangFeatures()]
+                              next.splice(index, 1)
+                              setLangFeatures(next)
+                            }}
+                            className='text-sky-400 hover:text-sky-600 ml-1'
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className='flex gap-2'>
+                      <input
+                        className={inputCls}
+                        placeholder={
+                          activeLang === 'zh' ? '输入特性后按回车添加' : activeLang === 'en' ? 'Type feature and press Enter' : activeLang === 'es' ? 'Escriba y presione Enter' : 'اكتب الميزة ثم اضغط Enter'
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            const val = (e.target as HTMLInputElement).value.trim()
+                            if (val) {
+                              setLangFeatures([...getLangFeatures(), val])
+                              ;(e.target as HTMLInputElement).value = ''
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Specs / 规格参数 */}
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      {activeLang === 'zh' ? '技术规格' : activeLang === 'en' ? 'Technical Specifications' : activeLang === 'es' ? 'Especificaciones Técnicas' : 'المواصفات الفنية'}
+                    </label>
+                    <div className='space-y-2'>
+                      {getLangSpecs().map((spec, index) => {
+                        const currentSpecs = getLangSpecs()
+                        return (
+                        <div key={index} className='flex gap-2 items-start'>
+                          <input
+                            className={`${inputCls} flex-1`}
+                            value={spec.label}
+                            onChange={(e) => {
+                              const next = [...currentSpecs]
+                              next[index] = { ...next[index], label: e.target.value }
+                              setLangSpecs(next)
+                            }}
+                            placeholder={activeLang === 'zh' ? '参数名' : activeLang === 'en' ? 'Parameter' : 'Parámetro'}
+                          />
+                          <input
+                            className={`${inputCls} flex-1`}
+                            value={spec.value}
+                            onChange={(e) => {
+                              const next = [...currentSpecs]
+                              next[index] = { ...next[index], value: e.target.value }
+                              setLangSpecs(next)
+                            }}
+                            placeholder={activeLang === 'zh' ? '参数值' : activeLang === 'en' ? 'Value' : 'Valor'}
+                          />
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setLangSpecs(currentSpecs.filter((_, i) => i !== index))
+                            }}
+                            className='px-2 py-2 text-red-400 hover:text-red-600'
+                          >
+                            &times;
+                          </button>
+                        </div>
+                        )
+                      })}
+                      <button
+                        type='button'
+                        onClick={() => setLangSpecs([...getLangSpecs(), { label: '', value: '' }])}
+                        className='text-sm text-sky-500 hover:text-sky-600 font-medium'
+                      >
+                        + {activeLang === 'zh' ? '添加参数' : activeLang === 'en' ? 'Add Parameter' : 'Añadir Parámetro'}
+                      </button>
+                    </div>
+                  </div>
+
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>
                       {activeLang === 'zh'

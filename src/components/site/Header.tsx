@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Globe, Menu, X, ChevronDown, ShoppingCart } from 'lucide-react'
-import { getLocale, setLocale } from '@/lib/i18n'
+import { setLocale } from '@/lib/i18n'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface NavPage {
   slug: string
@@ -64,10 +65,9 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langDropdownOpen, setLangDropdownOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [locale, setLocaleState] = useState('zh')
+  const locale = useLocale()
 
   useEffect(() => {
-    setLocaleState(getLocale())
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -94,7 +94,7 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
         }
         return {
           ...p,
-          name: locale !== 'zh' ? (p.nameEn || fallbackNames[p.pageType] || p.name) : p.name,
+          name: locale !== 'zh' ? (fallbackNames[p.pageType] || p.nameEn || p.name) : p.name,
         }
       })
     : defaultNav
@@ -188,7 +188,7 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
             </div>
 
             <Link
-              href="/contact"
+              href="/about#contact"
               className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg hover:shadow-sky-500/30 transition-all transform hover:scale-105"
             >
               {t.contact}
@@ -229,6 +229,35 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
               <ShoppingCart className="w-5 h-5" />
               <span>{t.inquiry}</span>
             </Link>
+
+            {/* Mobile Language Switcher */}
+            <div className="border-t border-gray-100 pt-3 mt-3">
+              <div className="flex items-center space-x-2 text-gray-500 text-sm mb-2">
+                <Globe className="w-4 h-4" />
+                <span>{t.langLabel}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { code: 'zh', label: '中文', flag: '🇨🇳' },
+                  { code: 'en', label: 'English', flag: '🇺🇸' },
+                  { code: 'es', label: 'Español', flag: '🇪🇸' },
+                  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+                ].map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setLocale(lang.code); setMobileMenuOpen(false) }}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-left transition-colors ${
+                      locale === lang.code
+                        ? 'bg-sky-50 text-sky-600 border border-sky-200'
+                        : 'text-gray-700 hover:bg-gray-50 border border-gray-200'
+                    }`}
+                  >
+                    <span className="text-xl">{lang.flag}</span>
+                    <span className="text-sm">{lang.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

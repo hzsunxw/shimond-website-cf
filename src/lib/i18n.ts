@@ -1,8 +1,21 @@
+import { matchLocale } from './locale-utils'
+
 // Client-side locale helper
 export function getLocale(): string {
-  if (typeof document === 'undefined') return 'en'
-  const match = document.cookie.match(/locale=([^;]+)/)
-  return match ? match[1].trim() : 'en'
+  // 1. 优先使用用户主动选择的语言（cookie）
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/locale=([^;]+)/)
+    if (match) return match[1].trim()
+  }
+
+  // 2. 根据浏览器 navigator.language 自动检测
+  if (typeof navigator !== 'undefined') {
+    const detected = matchLocale(navigator.language)
+    if (detected) return detected
+  }
+
+  // 3. 兜底默认英文
+  return 'en'
 }
 
 export function setLocale(locale: string) {

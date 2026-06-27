@@ -48,9 +48,8 @@ export default function ContactSection({ address, phone, email, socialLinks }: C
               <div className="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center flex-shrink-0">
                 <MapPin className="w-6 h-6 text-sky-500" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.address')}</h3>
-                <p className="text-gray-600">{address || 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China'}</p>
+              <div className="pt-3">
+                <p className="text-gray-600 text-lg">{t('about.contact.address')}</p>
               </div>
             </div>
 
@@ -58,9 +57,8 @@ export default function ContactSection({ address, phone, email, socialLinks }: C
               <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center flex-shrink-0">
                 <Phone className="w-6 h-6 text-emerald-500" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.phone')}</h3>
-                <p className="text-gray-600">{phone || '+86 571 8273 8888'}</p>
+              <div className="pt-3">
+                <p className="text-gray-600 text-lg">{t('about.contact.phone')}</p>
               </div>
             </div>
 
@@ -68,9 +66,8 @@ export default function ContactSection({ address, phone, email, socialLinks }: C
               <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center flex-shrink-0">
                 <Mail className="w-6 h-6 text-amber-500" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{t('contact.email')}</h3>
-                <p className="text-gray-600">{email || 'info@shimond.com'}</p>
+              <div className="pt-3">
+                <p className="text-gray-600 text-lg">{t('about.contact.email')}</p>
               </div>
             </div>
 

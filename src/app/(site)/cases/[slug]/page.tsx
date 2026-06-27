@@ -6,6 +6,9 @@ import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
 import { getLocalizedValue } from '@/lib/i18n'
+import JsonLd from '@/components/site/JsonLd'
+import { generateArticleSchema, generateBreadcrumbSchema } from '@/lib/structured-data'
+import Image from 'next/image'
 
 async function getCase(slug: string) {
   try {
@@ -51,8 +54,31 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
   const summary = getLocalizedValue(caseItem, locale, 'summary') || caseItem.summary
   const description = getLocalizedValue(caseItem, locale, 'description') || caseItem.description
 
+  // ── Structured data (JSON-LD) ──────────────────────────────────────────────
+  const seo = await getSiteSeo(locale)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const caseUrl = `${siteUrl}/cases/${params.slug}`
+  const publisherName = seo?.companyName || 'Shimond'
+
+  const articleSchema = generateArticleSchema({
+    title,
+    description: summary || description || undefined,
+    image: caseItem.coverImage || undefined,
+    url: caseUrl,
+    datePublished: caseItem.createdAt,
+    dateModified: caseItem.updatedAt,
+    publisherName,
+  })
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: t('home'), url: siteUrl },
+    { name: t('cases'), url: `${siteUrl}/cases` },
+    { name: title, url: caseUrl },
+  ])
+
   return (
     <div className="py-12">
+      <JsonLd data={[articleSchema, breadcrumbSchema]} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
@@ -65,8 +91,8 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
 
         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
           {caseItem.coverImage && (
-            <div className="aspect-video overflow-hidden">
-              <img src={caseItem.coverImage} alt={title} className="w-full h-full object-cover" />
+            <div className="aspect-video overflow-hidden relative">
+              <Image fill src={caseItem.coverImage} alt={title} sizes="(max-width: 768px) 100vw, 800px" className="object-cover" />
             </div>
           )}
           <div className="p-8 md:p-12">

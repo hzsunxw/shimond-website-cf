@@ -1,6 +1,7 @@
 'use client'
 
-import { ArrowRight, Play, ShieldCheck } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, Play, Shield, Leaf, HardHat } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
 
 export default function HeroSection() {
@@ -70,22 +71,42 @@ export default function HeroSection() {
           </div>
 
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl bg-gray-800 aspect-video">
-              <img
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-800 aspect-video">
+              <Image
                 src="https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=800&h=450&fit=crop"
                 alt="PVC"
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
               />
             </div>
 
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 animate-bounce" style={{ animationDuration: '6s' }}>
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <ShieldCheck className="w-6 h-6 text-emerald-600" />
+            <div className="absolute -bottom-6 -left-6 flex flex-col gap-3 animate-bounce" style={{ animationDuration: '8s' }}>
+              <div className="bg-white rounded-xl shadow-xl py-2 px-4 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">ISO 9001</div>
-                  <div className="text-sm text-gray-500">Certified</div>
+                  <div className="font-bold text-gray-900 text-sm">{t('hero.cert.iso9001')}</div>
+                  <div className="text-xs text-gray-500">{t('hero.cert.quality')}</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-xl py-2 px-4 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Leaf className="w-5 h-5 text-sky-600" />
+                </div>
+                <div>
+                  <div className="font-bold text-gray-900 text-sm">{t('hero.cert.iso14001')}</div>
+                  <div className="text-xs text-gray-500">{t('hero.cert.environment')}</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-xl py-2 px-4 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <HardHat className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div className="font-bold text-gray-900 text-sm">{t('hero.cert.ohsas')}</div>
+                  <div className="text-xs text-gray-500">{t('hero.cert.safety')}</div>
                 </div>
               </div>
             </div>

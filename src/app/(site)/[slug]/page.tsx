@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
+import AboutPageSection from '@/components/site/AboutPageSection'
+import { isVer4Theme } from '@/lib/theme'
+import Ver4AboutPage from '@/themes/ver4/AboutPage'
 
 async function getPage(slug: string) {
   try {
@@ -59,6 +62,11 @@ export default async function DynamicPage({ params }: { params: { slug: string }
 
   const pageType = (page as any).pageType || params.slug
   const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
+
+  if (pageType === 'about') {
+    if (isVer4Theme()) return <Ver4AboutPage locale={locale} />
+    return <AboutPageSection />
+  }
 
   return (
     <div className="pt-[5rem] pb-20" key={`about-${locale}`}>

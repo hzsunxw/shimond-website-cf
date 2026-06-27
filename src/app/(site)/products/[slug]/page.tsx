@@ -1,12 +1,15 @@
 import { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { ArrowRight, CheckCircle, Download } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
-import { getLocalizedValue } from '@/lib/i18n'
+import { getLocalizedValue, getLocalizedArray } from '@/lib/i18n'
 import AddToInquiryButton from '@/components/site/AddToInquiryButton'
+import JsonLd from '@/components/site/JsonLd'
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/structured-data'
 
 const fallbackProducts = [
   {
@@ -17,6 +20,7 @@ const fallbackProducts = [
     description: 'Our PVC synthetic leather uses high-quality raw materials and precision manufacturing. It offers outstanding wear resistance, water resistance, and soft touch, widely used in furniture, automotive interiors, bags, and more.',
     coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop',
     gallery: [],
+    features: ['防水防潮', '耐磨损', '易清洁', '环保材料'],
   },
   {
     id: 'fallback-2',
@@ -26,6 +30,7 @@ const fallbackProducts = [
     description: 'Professional-grade PVC mats made with eco-friendly materials, featuring excellent anti-slip performance and wear resistance. Suitable for homes, offices, commercial spaces, and more.',
     coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
     gallery: [],
+    features: ['防水防潮', '耐磨损', '易清洁', '环保材料'],
   },
   {
     id: 'fallback-3',
@@ -35,6 +40,7 @@ const fallbackProducts = [
     description: 'Transparent PVC table mats made with food-grade materials, non-toxic and odorless. Effectively protects tabletops from scratches, heat, and liquids while maintaining the aesthetics of your furniture.',
     coverImage: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=800&fit=crop',
     gallery: [],
+    features: ['防水防潮', '耐磨损', '易清洁', '环保材料'],
   },
 ]
 
@@ -73,25 +79,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-const defaultFeaturesEn = ['Waterproof', 'Wear-resistant', 'Easy to clean', 'Eco-friendly', 'Rich colors', 'Customizable size']
-const defaultFeaturesZh = ['防水防潮', '耐磨损', '易清洁', '环保材料', '色彩丰富', '可定制尺寸']
-
-const defaultSpecsEn = [
+const defaultSpecsEn: { label: string; value: string }[] = [
   { label: 'Material', value: '100% PVC' },
   { label: 'Thickness', value: '0.6mm - 2.0mm' },
   { label: 'Width', value: '1.37m - 1.5m' },
   { label: 'Backing', value: 'TC Cloth / Knitted / Non-woven' },
   { label: 'Color', value: 'Customizable' },
   { label: 'MOQ', value: '1000 meters' },
+  { label: 'Weight', value: '' },
+  { label: 'Density', value: '' },
 ]
 
-const defaultSpecsZh = [
+const defaultSpecsZh: { label: string; value: string }[] = [
   { label: '材质', value: '100% PVC' },
   { label: '厚度', value: '0.6mm - 2.0mm' },
   { label: '宽度', value: '1.37m - 1.5m' },
   { label: '背衬', value: 'TC布 / 针织布 / 无纺布' },
   { label: '颜色', value: '可定制' },
   { label: '最小起订量', value: '1000米' },
+  { label: '克重', value: '' },
+  { label: '密度', value: '' },
 ]
 
 export default async function ProductDetailPage({ params }: { params: { slug: string } }) {
@@ -109,11 +116,47 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
   const gallery = Array.isArray(product.gallery) ? (product.gallery as string[]) : []
   const mainImage = product.coverImage || gallery[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop'
-  const defaultFeatures = locale !== 'zh' ? defaultFeaturesEn : defaultFeaturesZh
-  const defaultSpecs = locale !== 'zh' ? defaultSpecsEn : defaultSpecsZh
+  const productSpecs = (() => {
+    const localized = getLocalizedArray(product, locale, 'specs')
+    if (Array.isArray(localized) && localized.length > 0) {
+      return localized as { label: string; value: string }[]
+    }
+    return locale !== 'zh' ? defaultSpecsEn : defaultSpecsZh
+  })()
+
+  const productFeatures = getLocalizedArray(product, locale, 'features') || (product.features as string[]) || []
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const productUrl = `${siteUrl}/products/${params.slug}`
+
+  // Price info only available on DB products (not fallbacks)
+  const hasPriceInfo = 'priceStrategy' in product
+  const productSchema = generateProductSchema({
+    name: productTitle,
+    description: productSummary || productDescription || undefined,
+    image: mainImage,
+    images: gallery.length > 0 ? gallery : undefined,
+    url: productUrl,
+    brand: 'Shimond',
+    sku: product.id,
+    offers: hasPriceInfo
+      ? {
+          price: 'price' in product && product.price != null ? Number(product.price) : null,
+          priceCurrency: ('priceCurrency' in product ? product.priceCurrency : null) || 'USD',
+          priceStrategy: 'priceStrategy' in product ? product.priceStrategy : 'CONTACT',
+        }
+      : undefined,
+  })
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: t('home'), url: siteUrl },
+    { name: t('products'), url: `${siteUrl}/products` },
+    { name: productTitle, url: productUrl },
+  ])
 
   return (
     <div className="py-12">
+      <JsonLd data={[productSchema, breadcrumbSchema]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
@@ -127,14 +170,14 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
-              <img src={mainImage} alt={productTitle} className="w-full h-full object-cover" />
+            <div className="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg relative">
+              <Image fill src={mainImage} alt={productTitle} sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
             </div>
             {gallery.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {gallery.slice(0, 4).map((img, index) => (
-                  <div key={index} className="aspect-square rounded-lg overflow-hidden border-2 border-gray-100">
-                    <img src={img} alt={`${productTitle} ${index + 1}`} className="w-full h-full object-cover" />
+                  <div key={index} className="aspect-square rounded-lg overflow-hidden border-2 border-gray-100 relative">
+                    <Image fill src={img} alt={`${productTitle} ${index + 1}`} sizes="(max-width: 768px) 25vw, 100px" className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -152,27 +195,28 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
             <p className="text-lg text-gray-600 mb-6">{productSummary || productDescription || t('product.defaultDesc')}</p>
 
+            {/* Product Features */}
+            {productFeatures.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {productFeatures.map((feature: string, index: number) => (
+                  <span key={index} className="px-3 py-1 bg-sky-50 text-sky-600 rounded-full text-sm font-medium border border-sky-100">
+                    {feature}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Specifications */}
             <div className="bg-white rounded-xl p-6 shadow-md mb-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">{t('product.specs')}</h3>
               <div className="grid grid-cols-2 gap-4">
-                {defaultSpecs.map((spec) => (
+                {productSpecs.map((spec) => (
                   <div key={spec.label}>
                     <span className="text-gray-500 text-sm">{spec.label}</span>
                     <p className="font-medium text-gray-900">{spec.value}</p>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Features */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {defaultFeatures.map((feature) => (
-                <div key={feature} className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  <span className="text-gray-700">{feature}</span>
-                </div>
-              ))}
             </div>
 
             {/* Actions */}
@@ -187,19 +231,16 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                 }}
                 variant="primary"
               />
-              <button className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
-                <Download className="w-5 h-5" />
-                <span>{t('product.download')}</span>
-              </button>
+
             </div>
           </div>
         </div>
 
         {/* Description */}
-        {product.description && (
+        {productDescription && (
           <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('product.details')}</h2>
-            <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{product.description}</div>
+            <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{productDescription}</div>
           </div>
         )}
       </div>

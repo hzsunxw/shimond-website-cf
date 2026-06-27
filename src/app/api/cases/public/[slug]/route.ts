@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const locale = (request.headers.get('x-locale') as string) || 'zh'
+    const locale = (request.headers.get('x-locale') as string) || 'en'
     
     const caseItem = await prisma.caseItem.findUnique({
       where: { slug: params.slug, status: 'ACTIVE' },

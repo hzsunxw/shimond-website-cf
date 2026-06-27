@@ -4,9 +4,21 @@ const ADMIN_PATH = (process.env.NEXT_PUBLIC_ADMIN_PATH || '/admin').replace(/^\/
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+
+  // ✅ 修复：将 outputFileTracingIncludes 移到 experimental 下
+  experimental: {
+    outputFileTracingIncludes: {
+      '/*': ['./node_modules/.prisma/client/**/*'],
+    },
+  },
+  
   images: {
-    domains: ['localhost'],
-    unoptimized: process.env.NODE_ENV === 'development',
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: 'localhost' },
+    ],
+    unoptimized: true,
   },
   async rewrites() {
     // If admin path is customized, rewrite external path to internal /admin

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Check, TrendingUp } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
 
@@ -24,7 +25,7 @@ export default function AboutSection() {
 
             <div className="mt-8">
               <a
-                href="/contact"
+                href="/about#contact"
                 className="inline-flex items-center space-x-2 bg-sky-500 text-white px-8 py-4 rounded-full font-semibold hover:bg-sky-600 transition-colors"
               >
                 <span>{t('contact')}</span>
@@ -34,11 +35,13 @@ export default function AboutSection() {
           </div>
 
           <div className="relative">
-            <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
-              <img
+            <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
+              <Image
                 src="https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=600&h=600&fit=crop"
                 alt="Factory"
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
               />
             </div>
           </div>

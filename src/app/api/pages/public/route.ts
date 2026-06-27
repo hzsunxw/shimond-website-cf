@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
   try {
-    const locale = (request.headers.get('x-locale') as string) || 'zh'
+    const locale = (request.headers.get('x-locale') as string) || 'en'
     
     const pages = await prisma.page.findMany({
       where: { status: 'ACTIVE', showInNav: true },

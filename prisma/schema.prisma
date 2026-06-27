@@ -273,6 +273,15 @@ model ServiceItem {
   priceCurrency String?  @default("USD") @map("price_currency")
   priceStrategy PriceDisplayStrategy @default(CONTACT) @map("price_strategy")
 
+  features    String[] @default([])
+  featuresEn  String[] @default([]) @map("features_en")
+  featuresEs  String[] @default([]) @map("features_es")
+  featuresAr  String[] @default([]) @map("features_ar")
+  specs       Json?    @default("[]")
+  specsEn     Json?    @default("[]") @map("specs_en")
+  specsEs     Json?    @default("[]") @map("specs_es")
+  specsAr     Json?    @default("[]") @map("specs_ar")
+
   sortOrder Int    @default(0) @map("sort_order")
   status    Status @default(ACTIVE)
 

@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { isVer4Theme } from '@/lib/theme'
+import Ver4CasesPage from '@/themes/ver4/CasesPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -78,6 +81,8 @@ export default async function CasesPage() {
   const cases = await getCases()
   const display = cases.length > 0 ? cases : fallbackCases
 
+  if (isVer4Theme()) return <Ver4CasesPage locale={locale} cases={display} />
+
   return (
     <div className="pt-[5rem] pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,15 +94,17 @@ export default async function CasesPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {display.map((item: { id: string; title: string; slug: string; clientName: string | null; summary: string | null; coverImage: string | null }) => (
-            <div
+            <article
               key={item.id}
               className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
             >
               <div className="relative aspect-[4/3] overflow-hidden group">
-                <img
+                <Image
+                  fill
                   src={item.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop'}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
               <div className="p-6">
@@ -112,7 +119,7 @@ export default async function CasesPage() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

@@ -9,6 +9,8 @@ interface ProductFields {
   description?: string
   content?: string
   tags?: string
+  features?: string
+  specs?: string
   seoTitle?: string
   seoDescription?: string
   seoKeywords?: string
@@ -43,9 +45,11 @@ STRICT RULES:
 6. SEO: title ~50-60 chars, description ~150-160 chars, keywords comma-separated.
 7. If "content" field exists, translate it too (preserve paragraph structure as a single escaped string).
 8. If "tags" field exists, translate each tag individually and keep them comma-separated in one string.
+9. If "features" field exists, translate each feature individually and keep them comma-separated in one string.
+10. If "specs" field exists, it is in "Label: Value" format (one per line). Translate the Label part to the target language. For the Value part: translate any natural-language text (e.g. "可定制" -> "Customizable"), but keep pure technical values unchanged (e.g. "100% PVC", "0.6mm - 2.0mm", "1.37m - 1.5m"). Preserve the "Label: Value" format and newlines.
 
 REQUIRED JSON FORMAT (all fields optional depending on input):
-{"title":"...","summary":"...","description":"...","content":"...","tags":"tag1, tag2, tag3","seoTitle":"...","seoDescription":"...","seoKeywords":"..."}`
+{"title":"...","summary":"...","description":"...","content":"...","tags":"tag1, tag2, tag3","features":"feature1, feature2, feature3","specs":"Label1: Value1\\nLabel2: Value2","seoTitle":"...","seoDescription":"...","seoKeywords":"..."}`
 }
 
 function buildUserPrompt(fieldsText: string): string {

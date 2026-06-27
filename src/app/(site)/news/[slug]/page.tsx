@@ -6,6 +6,9 @@ import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
 import { getLocalizedValue, getLocalizedArray } from '@/lib/i18n'
+import JsonLd from '@/components/site/JsonLd'
+import { generateArticleSchema, generateBreadcrumbSchema } from '@/lib/structured-data'
+import Image from 'next/image'
 
 async function getNewsItem(slug: string) {
   try {
@@ -60,8 +63,33 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
   const summary = getLocalizedValue(newsItem, locale, 'summary') || newsItem.summary
   const content = getLocalizedValue(newsItem, locale, 'content') || newsItem.content
 
+  // ── Structured data (JSON-LD) ──────────────────────────────────────────────
+  const seo = await getSiteSeo(locale)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const newsUrl = `${siteUrl}/news/${params.slug}`
+  const publisherName = seo?.companyName || 'Shimond'
+
+  const articleSchema = generateArticleSchema({
+    title,
+    description: summary || undefined,
+    image: newsItem.coverImage || undefined,
+    url: newsUrl,
+    datePublished: newsItem.publishAt || newsItem.createdAt,
+    dateModified: newsItem.updatedAt,
+    author: newsItem.author || undefined,
+    publisherName,
+    keywords: getLocalizedArray(newsItem, locale, 'tags') || undefined,
+  })
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: t('home'), url: siteUrl },
+    { name: t('news'), url: `${siteUrl}/news` },
+    { name: title, url: newsUrl },
+  ])
+
   return (
     <div className="py-12">
+      <JsonLd data={[articleSchema, breadcrumbSchema]} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
@@ -74,8 +102,8 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
 
         <article className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
           {newsItem.coverImage && (
-            <div className="aspect-video overflow-hidden">
-              <img src={newsItem.coverImage} alt={title} className="w-full h-full object-cover" />
+            <div className="aspect-video overflow-hidden relative">
+              <Image fill src={newsItem.coverImage} alt={title} sizes="(max-width: 768px) 100vw, 800px" className="object-cover" />
             </div>
           )}
           <div className="p-8 md:p-12">
@@ -83,7 +111,9 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
               {newsItem.publishAt && (
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(newsItem.publishAt, locale)}</span>
+                  <time dateTime={new Date(newsItem.publishAt).toISOString()}>
+                    {formatDate(newsItem.publishAt, locale)}
+                  </time>
                 </div>
               )}
               {newsItem.author && (

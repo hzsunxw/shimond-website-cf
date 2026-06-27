@@ -1,6 +1,6 @@
 'use client'
 
-import { Factory, Award, Truck, Headphones } from 'lucide-react'
+import { FlaskConical, Leaf, Cog, BarChart3 } from 'lucide-react'
 import SectionHeader, { FeatureCard } from './SectionComponents'
 import { useTranslations } from '@/lib/translations'
 
@@ -13,27 +13,27 @@ export default function FeaturesSection() {
         <SectionHeader badge={t('features.badge')} title={t('features.title')} badgeColor="emerald" />
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <FeatureCard
-            icon={<Factory className="w-7 h-7" />}
-            title={t('features.quality')}
-            desc={t('features.quality.desc')}
+            icon={<FlaskConical className="w-7 h-7" />}
+            title={t('features.tech')}
+            desc={t('features.tech.desc')}
             color="sky"
           />
           <FeatureCard
-            icon={<Award className="w-7 h-7" />}
-            title={t('features.custom')}
-            desc={t('features.custom.desc')}
+            icon={<Leaf className="w-7 h-7" />}
+            title={t('features.eco')}
+            desc={t('features.eco.desc')}
             color="emerald"
           />
           <FeatureCard
-            icon={<Truck className="w-7 h-7" />}
-            title={t('features.delivery')}
-            desc={t('features.delivery.desc')}
+            icon={<Cog className="w-7 h-7" />}
+            title={t('features.smart')}
+            desc={t('features.smart.desc')}
             color="amber"
           />
           <FeatureCard
-            icon={<Headphones className="w-7 h-7" />}
-            title={t('features.support')}
-            desc={t('features.support.desc')}
+            icon={<BarChart3 className="w-7 h-7" />}
+            title={t('features.capacity')}
+            desc={t('features.capacity.desc')}
             color="purple"
           />
         </div>

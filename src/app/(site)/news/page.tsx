@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Calendar, Tag } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { isVer4Theme } from '@/lib/theme'
+import Ver4NewsPage from '@/themes/ver4/NewsPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -95,6 +98,8 @@ export default async function NewsPage() {
   const news = await getNews()
   const display = news.length > 0 ? news : fallbackNews
 
+  if (isVer4Theme()) return <Ver4NewsPage locale={locale} news={display} />
+
   return (
     <div className="pt-[5rem] pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,21 +111,25 @@ export default async function NewsPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {display.map((item: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null; author: string | null; publishAt: Date | null; tags: string[] }) => (
-            <div
+            <article
               key={item.id}
               className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
             >
               <div className="relative aspect-[3/2] overflow-hidden group">
-                <img
+                <Image
+                  fill
                   src={item.coverImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop'}
                   alt={getLocalizedValue(item, locale, 'title') || item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
               <div className="p-6">
                 <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(item.publishAt, locale)}</span>
+                  <time dateTime={item.publishAt ? new Date(item.publishAt).toISOString() : undefined}>
+                    {formatDate(item.publishAt, locale)}
+                  </time>
                   {item.author && <span>· {item.author}</span>}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{getLocalizedValue(item, locale, 'title') || item.title}</h3>
@@ -152,7 +161,7 @@ export default async function NewsPage() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

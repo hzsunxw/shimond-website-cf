@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 
 export async function POST(request: Request) {
+  console.log('🔍 [LOGIN] 收到 POST 请求');
   try {
     const { username, password } = await request.json()
 
@@ -61,10 +62,13 @@ export async function POST(request: Request) {
       },
     })
 
-    // 设置 cookie
+    // 设置 cookie（Secure 标志仅在使用 HTTPS 时开启，避免 HTTP 站点被浏览器静默拒绝）
+    const isSecure = request.url.startsWith('https')
+      || request.headers.get('x-forwarded-proto') === 'https'
+
     response.cookies.set('admin-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/',

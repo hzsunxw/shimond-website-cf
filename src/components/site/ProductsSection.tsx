@@ -10,7 +10,7 @@ interface Product {
   slug: string
   summary: string
   coverImage: string
-  tags: string[]
+  tags?: string[]
   badge?: string
 }
 

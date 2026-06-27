@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { ArrowRight, ShieldCheck, Factory, Award, Truck, Headphones } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
 
@@ -48,11 +49,11 @@ export function FeatureCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+    <article className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${colorMap[color]}`}>{icon}</div>
       <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
       <p className="text-gray-600">{desc}</p>
-    </div>
+    </article>
   )
 }
 
@@ -60,23 +61,23 @@ export function ProductCard({
   title,
   desc,
   image,
-  tags,
+  tags = [],
   href,
   badge,
 }: {
   title: string
   desc: string
   image: string
-  tags: string[]
+  tags?: string[]
   href: string
   badge?: string
 }) {
   const t = useTranslations()
   
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+    <article className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
       <div className="relative aspect-[4/3] overflow-hidden group">
-        <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+        <Image fill src={image} alt={title} sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <a
@@ -109,16 +110,16 @@ export function ProductCard({
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <span className="text-sky-500 font-bold text-lg">{t('inquiry')}</span>
-          <a
-            href="/contact"
-            className="w-10 h-10 bg-sky-50 rounded-full flex items-center justify-center text-sky-500 hover:bg-sky-500 hover:text-white transition-colors"
-          >
+        <a
+          href={href}
+          className="flex items-center justify-between pt-4 border-t border-gray-100 group"
+        >
+          <span className="text-sky-500 font-bold text-lg group-hover:text-sky-600 transition-colors">{t('viewDetails')}</span>
+          <span className="w-10 h-10 bg-sky-50 rounded-full flex items-center justify-center text-sky-500 group-hover:bg-sky-500 group-hover:text-white transition-colors">
             <ArrowRight className="w-5 h-5" />
-          </a>
-        </div>
+          </span>
+        </a>
       </div>
-    </div>
+    </article>
   )
 }
