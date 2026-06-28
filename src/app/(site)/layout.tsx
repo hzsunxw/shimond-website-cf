@@ -7,8 +7,9 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getSiteSeo } from '@/lib/seo'
 import { generateOrganizationSchema, generateWebsiteSchema } from '@/lib/structured-data'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4Layout from '@/themes/ver4/Layout'
+import Ver3Layout from '@/themes/ver3/Layout'
 
 async function getSiteData() {
   try {
@@ -129,7 +130,19 @@ export default async function SiteLayout({
   return (
     <LocaleProvider locale={locale}>
       <JsonLd data={[orgSchema, websiteSchema]} />
-      {isVer4Theme() ? (
+      {isVer3Theme() ? (
+        <Ver3Layout
+          locale={locale}
+          siteName={companyName}
+          companyName={companyName}
+          address={address}
+          phone={phone}
+          email={email}
+          socialLinks={config?.socialLinks as Record<string, string> | null}
+        >
+          {children}
+        </Ver3Layout>
+      ) : isVer4Theme() ? (
         <Ver4Layout
           locale={locale}
           siteName={companyName}

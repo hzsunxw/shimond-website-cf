@@ -21,3 +21,7 @@ export function isDefaultTheme(): boolean {
 export function isVer4Theme(): boolean {
   return getTheme() === 'ver4'
 }
+
+export function isVer3Theme(): boolean {
+  return getTheme() === 'ver3'
+}
