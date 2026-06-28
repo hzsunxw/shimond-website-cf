@@ -5,8 +5,9 @@ import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
 import AboutPageSection from '@/components/site/AboutPageSection'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4AboutPage from '@/themes/ver4/AboutPage'
+import Ver3AboutPage from '@/themes/ver3/AboutPage'
 
 async function getPage(slug: string) {
   try {
@@ -64,6 +65,7 @@ export default async function DynamicPage({ params }: { params: { slug: string }
   const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
 
   if (pageType === 'about') {
+    if (isVer3Theme()) return <Ver3AboutPage locale={locale} />
     if (isVer4Theme()) return <Ver4AboutPage locale={locale} />
     return <AboutPageSection />
   }

@@ -11,8 +11,9 @@ import AboutSection from '@/components/site/AboutSection'
 import ProductionLineSection from '@/components/site/ProductionLineSection'
 import GallerySection from '@/components/site/GallerySection'
 import ContactSection from '@/components/site/ContactSection'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4HomePage from '@/themes/ver4/HomePage'
+import Ver3HomePage from '@/themes/ver3/HomePage'
 
 const fallbackProducts = [
   {
@@ -152,6 +153,10 @@ export default async function HomePage() {
           coverImage: p.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop',
         }))
       : fallbackProducts
+
+  if (isVer3Theme()) {
+    return <Ver3HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+  }
 
   if (isVer4Theme()) {
     return <Ver4HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
