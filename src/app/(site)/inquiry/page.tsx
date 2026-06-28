@@ -111,7 +111,7 @@ export default function InquiryPage() {
 
   if (submitted) {
     return (
-      <div className="py-20">
+      <div className="page-body pb-20">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Package className="w-10 h-10 text-emerald-600" />
@@ -140,7 +140,7 @@ export default function InquiryPage() {
   }
 
   return (
-    <div className="py-12">
+    <div className="page-body pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">

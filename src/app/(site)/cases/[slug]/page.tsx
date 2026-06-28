@@ -77,7 +77,7 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
   ])
 
   return (
-    <div className="py-12">
+    <div className="page-body pb-12">
       <JsonLd data={[articleSchema, breadcrumbSchema]} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
