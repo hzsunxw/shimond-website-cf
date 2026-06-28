@@ -3,8 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4CasesPage from '@/themes/ver4/CasesPage'
+import Ver3CasesPage from '@/themes/ver3/CasesPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -81,6 +82,7 @@ export default async function CasesPage() {
   const cases = await getCases()
   const display = cases.length > 0 ? cases : fallbackCases
 
+  if (isVer3Theme()) return <Ver3CasesPage locale={locale} cases={display} />
   if (isVer4Theme()) return <Ver4CasesPage locale={locale} cases={display} />
 
   return (

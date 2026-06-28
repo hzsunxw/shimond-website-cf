@@ -3,8 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4ProductsPage from '@/themes/ver4/ProductsPage'
+import Ver3ProductsPage from '@/themes/ver3/ProductsPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -78,6 +79,7 @@ export default async function ProductsPage() {
   const products = await getProducts()
   const display = products.length > 0 ? products : fallbackProducts
 
+  if (isVer3Theme()) return <Ver3ProductsPage locale={locale} products={display} />
   if (isVer4Theme()) return <Ver4ProductsPage locale={locale} products={display} />
 
   return (

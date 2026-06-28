@@ -3,8 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Calendar, Tag } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { isVer4Theme } from '@/lib/theme'
+import { isVer4Theme, isVer3Theme } from '@/lib/theme'
 import Ver4NewsPage from '@/themes/ver4/NewsPage'
+import Ver3NewsPage from '@/themes/ver3/NewsPage'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -98,6 +99,7 @@ export default async function NewsPage() {
   const news = await getNews()
   const display = news.length > 0 ? news : fallbackNews
 
+  if (isVer3Theme()) return <Ver3NewsPage locale={locale} news={display} />
   if (isVer4Theme()) return <Ver4NewsPage locale={locale} news={display} />
 
   return (
