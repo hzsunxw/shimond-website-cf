@@ -5,13 +5,15 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
 
-  // ✅ 修复：将 outputFileTracingIncludes 移到 experimental 下
   experimental: {
     outputFileTracingIncludes: {
-      '/*': ['./node_modules/.prisma/client/**/*'],
+      '/*': [
+        './node_modules/.prisma/client/**/*',
+        './public/themes/**/*',
+      ],
     },
   },
-  
+
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
