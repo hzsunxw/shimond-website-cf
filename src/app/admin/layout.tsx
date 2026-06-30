@@ -1,5 +1,8 @@
 import AdminSidebar from '@/components/admin/sidebar'
 
+// Admin pages require authentication and live DB access — never static-render.
+export const dynamic = 'force-dynamic'
+
 export default function AdminLayout({
   children,
 }: {
