@@ -52,11 +52,13 @@ nul
 *.seed
 *.pid.lock
 
-# Legacy prototypes
-ver1/
-ver2/
-ver3/
-ver4/
+# Legacy prototypes (root-level only)
+/ver1/
+/ver2/
+/ver3/
+/ver4/
+/ver5/
+/ver6/
 
 # Logs
 logs/
