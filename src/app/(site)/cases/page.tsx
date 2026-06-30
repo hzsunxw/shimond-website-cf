@@ -3,9 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { isVer4Theme, isVer3Theme } from '@/lib/theme'
-import Ver4CasesPage from '@/themes/ver4/CasesPage'
-import Ver3CasesPage from '@/themes/ver3/CasesPage'
+import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme } from '@/lib/theme'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -82,8 +80,10 @@ export default async function CasesPage() {
   const cases = await getCases()
   const display = cases.length > 0 ? cases : fallbackCases
 
-  if (isVer3Theme()) return <Ver3CasesPage locale={locale} cases={display} />
-  if (isVer4Theme()) return <Ver4CasesPage locale={locale} cases={display} />
+  if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/CasesPage'); return <C locale={locale} cases={display} /> }
+  if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/CasesPage'); return <C locale={locale} cases={display} /> }
+  if (isVer5Theme()) { const { default: C } = await import('@/themes/ver5/CasesPage'); return <C locale={locale} cases={display} /> }
+  if (isVer6Theme()) { const { default: C } = await import('@/themes/ver6/CasesPage'); return <C locale={locale} cases={display} /> }
 
   return (
     <div className="pt-[5rem] pb-20">

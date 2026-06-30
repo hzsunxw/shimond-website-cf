@@ -11,9 +11,7 @@ import AboutSection from '@/components/site/AboutSection'
 import ProductionLineSection from '@/components/site/ProductionLineSection'
 import GallerySection from '@/components/site/GallerySection'
 import ContactSection from '@/components/site/ContactSection'
-import { isVer4Theme, isVer3Theme } from '@/lib/theme'
-import Ver4HomePage from '@/themes/ver4/HomePage'
-import Ver3HomePage from '@/themes/ver3/HomePage'
+import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme } from '@/lib/theme'
 
 const fallbackProducts = [
   {
@@ -155,11 +153,23 @@ export default async function HomePage() {
       : fallbackProducts
 
   if (isVer3Theme()) {
+    const { default: Ver3HomePage } = await import('@/themes/ver3/HomePage')
     return <Ver3HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
   }
 
   if (isVer4Theme()) {
+    const { default: Ver4HomePage } = await import('@/themes/ver4/HomePage')
     return <Ver4HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+  }
+
+  if (isVer5Theme()) {
+    const { default: Ver5HomePage } = await import('@/themes/ver5/HomePage')
+    return <Ver5HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+  }
+
+  if (isVer6Theme()) {
+    const { default: Ver6HomePage } = await import('@/themes/ver6/HomePage')
+    return <Ver6HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
   }
 
   return (

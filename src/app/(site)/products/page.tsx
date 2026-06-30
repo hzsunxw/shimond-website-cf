@@ -3,9 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { isVer4Theme, isVer3Theme } from '@/lib/theme'
-import Ver4ProductsPage from '@/themes/ver4/ProductsPage'
-import Ver3ProductsPage from '@/themes/ver3/ProductsPage'
+import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme } from '@/lib/theme'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
@@ -79,8 +77,10 @@ export default async function ProductsPage() {
   const products = await getProducts()
   const display = products.length > 0 ? products : fallbackProducts
 
-  if (isVer3Theme()) return <Ver3ProductsPage locale={locale} products={display} />
-  if (isVer4Theme()) return <Ver4ProductsPage locale={locale} products={display} />
+  if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/ProductsPage'); return <C locale={locale} products={display} /> }
+  if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/ProductsPage'); return <C locale={locale} products={display} /> }
+  if (isVer5Theme()) { const { default: C } = await import('@/themes/ver5/ProductsPage'); return <C locale={locale} products={display} /> }
+  if (isVer6Theme()) { const { default: C } = await import('@/themes/ver6/ProductsPage'); return <C locale={locale} products={display} /> }
 
   return (
     <div className="pt-[5rem] pb-20">

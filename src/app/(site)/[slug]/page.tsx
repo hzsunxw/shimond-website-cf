@@ -5,9 +5,7 @@ import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
 import AboutPageSection from '@/components/site/AboutPageSection'
-import { isVer4Theme, isVer3Theme } from '@/lib/theme'
-import Ver4AboutPage from '@/themes/ver4/AboutPage'
-import Ver3AboutPage from '@/themes/ver3/AboutPage'
+import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme } from '@/lib/theme'
 
 async function getPage(slug: string) {
   try {
@@ -65,8 +63,10 @@ export default async function DynamicPage({ params }: { params: { slug: string }
   const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
 
   if (pageType === 'about') {
-    if (isVer3Theme()) return <Ver3AboutPage locale={locale} />
-    if (isVer4Theme()) return <Ver4AboutPage locale={locale} />
+    if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/AboutPage'); return <C locale={locale} /> }
+    if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/AboutPage'); return <C locale={locale} /> }
+    if (isVer5Theme()) { const { default: C } = await import('@/themes/ver5/AboutPage'); return <C locale={locale} /> }
+    if (isVer6Theme()) { const { default: C } = await import('@/themes/ver6/AboutPage'); return <C locale={locale} /> }
     return <AboutPageSection />
   }
 

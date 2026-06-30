@@ -7,9 +7,12 @@ import { prisma } from '@/lib/prisma'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getSiteSeo } from '@/lib/seo'
 import { generateOrganizationSchema, generateWebsiteSchema } from '@/lib/structured-data'
-import { isVer4Theme, isVer3Theme } from '@/lib/theme'
-import Ver4Layout from '@/themes/ver4/Layout'
-import Ver3Layout from '@/themes/ver3/Layout'
+import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme, getTheme } from '@/lib/theme'
+
+// Theme Layout components are imported dynamically (await import) below so that
+// only the active theme's code is loaded. Theme CSS is served as static files
+// from /public/themes/<name>/styles.css and loaded via <link> to avoid Next.js
+// App Router bundling all themes' CSS together.
 
 async function getSiteData() {
   try {
@@ -127,50 +130,57 @@ export default async function SiteLayout({
     locale,
   })
 
+  const themeProps = {
+    locale,
+    siteName: companyName,
+    companyName,
+    address,
+    phone,
+    email,
+    socialLinks: config?.socialLinks as Record<string, string> | null,
+  }
+
+  // Dynamically import only the active theme's Layout component.
+  // CSS is loaded separately via <link> above (see themeCss) from /public/themes/.
+  let ThemeLayout: React.ComponentType<typeof themeProps & { children: React.ReactNode }> | null = null
+  if (isVer3Theme()) ThemeLayout = (await import('@/themes/ver3/Layout')).default
+  else if (isVer4Theme()) ThemeLayout = (await import('@/themes/ver4/Layout')).default
+  else if (isVer5Theme()) ThemeLayout = (await import('@/themes/ver5/Layout')).default
+  else if (isVer6Theme()) ThemeLayout = (await import('@/themes/ver6/Layout')).default
+
+  const themeName = getTheme()
+  const themeCss = themeName !== 'default' ? (
+    <link rel="stylesheet" href={`/themes/${themeName}/styles.css`} />
+  ) : null
+
+  if (ThemeLayout) {
+    return (
+      <LocaleProvider locale={locale}>
+        {themeCss}
+        <JsonLd data={[orgSchema, websiteSchema]} />
+        <ThemeLayout {...themeProps}>{children}</ThemeLayout>
+      </LocaleProvider>
+    )
+  }
+
   return (
     <LocaleProvider locale={locale}>
-      <JsonLd data={[orgSchema, websiteSchema]} />
-      {isVer3Theme() ? (
-        <Ver3Layout
-          locale={locale}
+      {themeCss}
+      <div className="min-h-screen flex flex-col">
+        <SiteHeader
+          siteName={companyName}
+          pages={navPages}
+        />
+        <main className="flex-1 pt-20">{children}</main>
+        <SiteFooter
           siteName={companyName}
           companyName={companyName}
           address={address}
           phone={phone}
           email={email}
           socialLinks={config?.socialLinks as Record<string, string> | null}
-        >
-          {children}
-        </Ver3Layout>
-      ) : isVer4Theme() ? (
-        <Ver4Layout
-          locale={locale}
-          siteName={companyName}
-          companyName={companyName}
-          address={address}
-          phone={phone}
-          email={email}
-          socialLinks={config?.socialLinks as Record<string, string> | null}
-        >
-          {children}
-        </Ver4Layout>
-      ) : (
-        <div className="min-h-screen flex flex-col">
-          <SiteHeader
-            siteName={companyName}
-            pages={navPages}
-          />
-          <main className="flex-1 pt-20">{children}</main>
-          <SiteFooter
-            siteName={companyName}
-            companyName={companyName}
-            address={address}
-            phone={phone}
-            email={email}
-            socialLinks={config?.socialLinks as Record<string, string> | null}
-          />
-        </div>
-      )}
+        />
+      </div>
     </LocaleProvider>
   )
 }
