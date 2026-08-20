@@ -124,6 +124,37 @@ export function generateOrganizationSchema(params: OrganizationParams): JsonLdOb
     }
   }
 
+  // ─── Trading policy (B2B, verified against actual business practice) ─────
+  // FOB (Free On Board) terms: the seller does not charge shipping (buyer
+  // arranges freight), and goods are inspected before shipment, so there is
+  // no return-on-remorse. Quality issues are handled per commercial agreement.
+  const exportCountries = ['US', 'GB', 'DE', 'FR', 'ES', 'CA', 'AU']
+
+  schema.hasMerchantReturnPolicy = {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: exportCountries,
+    returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+    merchantReturnLink: `${siteUrl}/shipping-policy`,
+  }
+
+  schema.hasShippingService = {
+    '@type': 'ShippingService',
+    name: 'FOB shipping',
+    description: 'FOB (Free On Board) — buyer arranges and pays for freight',
+    shippingConditions: {
+      '@type': 'ShippingConditions',
+      shippingDestination: {
+        '@type': 'DefinedRegion',
+        addressCountry: exportCountries,
+      },
+      shippingRate: {
+        '@type': 'MonetaryAmount',
+        value: 0,
+        currency: 'USD',
+      },
+    },
+  }
+
   return schema
 }
 
@@ -217,40 +248,21 @@ export function generateProductSchema(params: ProductParams): JsonLdObject {
     schema.category = category
   }
 
-  // Offers
-  if (offers) {
-    const offer: Record<string, unknown> = {
+  // Offers — only emitted when an exact price is available.
+  // Google requires Offer.price (or priceSpecification.price); emitting an Offer
+  // without a price triggers a severe "must specify price" structured data error,
+  // and fabricating prices violates Google Merchant policies. B2B contact/ranged
+  // pricing therefore omits the offers block entirely.
+  if (offers?.priceStrategy === 'EXACT' && offers.price != null) {
+    schema.offers = {
       '@type': 'Offer',
       url,
+      price: String(offers.price),
+      priceCurrency: offers.priceCurrency || 'USD',
+      availability: offers.availability
+        ? `https://schema.org/${offers.availability}`
+        : 'https://schema.org/InStock',
     }
-
-    if (offers.priceCurrency) {
-      offer.priceCurrency = offers.priceCurrency
-    }
-
-    if (offers.priceStrategy === 'EXACT' && offers.price != null) {
-      offer.price = String(offers.price)
-    } else if (offers.priceStrategy === 'RANGE') {
-      // Range pricing — no exact price, mark as available upon inquiry
-      offer.priceSpecification = {
-        '@type': 'PriceSpecification',
-        ...(offers.priceCurrency ? { priceCurrency: offers.priceCurrency } : {}),
-      }
-    } else {
-      // CONTACT or unspecified — no price shown
-      offer.priceSpecification = {
-        '@type': 'PriceSpecification',
-        ...(offers.priceCurrency ? { priceCurrency: offers.priceCurrency } : {}),
-      }
-    }
-
-    if (offers.availability) {
-      offer.availability = `https://schema.org/${offers.availability}`
-    } else {
-      offer.availability = 'https://schema.org/InStock'
-    }
-
-    schema.offers = offer
   }
 
   return schema

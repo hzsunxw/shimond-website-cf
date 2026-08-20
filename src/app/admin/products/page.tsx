@@ -36,6 +36,7 @@ interface Product {
   priceStrategy: string
   sortOrder: number
   status: string
+  category: string | null
   seoTitle: string | null
   seoDescription: string | null
   seoKeywords: string | null
@@ -91,6 +92,7 @@ const emptyForm = {
   priceStrategy: 'CONTACT',
   sortOrder: 0,
   status: 'ACTIVE',
+  category: '',
   seoTitle: '',
   seoDescription: '',
   seoKeywords: '',
@@ -122,6 +124,13 @@ function getLangField(base: string, lang: string) {
   return lang === 'zh' ? base : `${base}${capitalize(lang)}`
 }
 
+const categoryMap: Record<string, string> = {
+  'PVC_FOAM': 'PVC发泡材料',
+  'PVC_MATS': 'PVC地垫',
+  'TABLE_PROTECTOR': '桌垫保护垫',
+  'SOUNDCOTTON': '隔音棉',
+}
+
 export default function ProductsAdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -134,6 +143,7 @@ export default function ProductsAdminPage() {
   const [activeLang, setActiveLang] = useState('zh')
   const [translating, setTranslating] = useState(false)
   const [generatingSeo, setGeneratingSeo] = useState(false)
+  const [filterCategory, setFilterCategory] = useState('')
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
@@ -194,6 +204,7 @@ export default function ProductsAdminPage() {
       priceStrategy: item.priceStrategy || 'CONTACT',
       sortOrder: item.sortOrder,
       status: item.status,
+      category: item.category || '',
       seoTitle: item.seoTitle || '',
       seoDescription: item.seoDescription || '',
       seoKeywords: item.seoKeywords || '',
@@ -310,6 +321,7 @@ export default function ProductsAdminPage() {
         priceStrategy: form.priceStrategy,
         sortOrder: form.sortOrder,
         status: form.status,
+        category: form.category || null,
         seoTitle: form.seoTitle || null,
         seoDescription: form.seoDescription || null,
         seoKeywords: form.seoKeywords || null,
@@ -555,6 +567,13 @@ export default function ProductsAdminPage() {
   const selectCls =
     'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 
+  const filteredProducts =
+    filterCategory === ''
+      ? products
+      : filterCategory === '__none__'
+        ? products.filter((p) => !p.category)
+        : products.filter((p) => p.category === filterCategory)
+
   return (
     <>
       <header className='bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between'>
@@ -566,21 +585,37 @@ export default function ProductsAdminPage() {
       </header>
 
       <div className='p-8'>
-        <div className='bg-white rounded-lg shadow overflow-hidden'>
+        <div className='flex items-center gap-3 mb-4'>
+          <label className='text-sm font-medium text-gray-700 whitespace-nowrap'>{'\u5206\u7c7b\u7b5b\u9009'}</label>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className='flex h-10 w-auto min-w-[180px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+          >
+            <option value=''>{'\u5168\u90e8\u5206\u7c7b'}</option>
+            <option value='__none__'>{'\u672a\u5206\u7c7b'}</option>
+            {Object.entries(categoryMap).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+          <span className='text-sm text-gray-500'>{'\u5171'} {filteredProducts.length} {'\u6761'}</span>
+        </div>
+        <div className='bg-white rounded-lg shadow overflow-x-auto'>
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u5c01\u9762'}</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u6807\u9898'}</th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u5206\u7c7b'}</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Slug</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u4ef7\u683c'}</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u72b6\u6001'}</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u6392\u5e8f'}</th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>{'\u64cd\u4f5c'}</th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 z-10'>{'\u64cd\u4f5c'}</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {products.map((item) => (
+              {filteredProducts.map((item) => (
                 <tr key={item.id}>
                   <td className='px-6 py-4 whitespace-nowrap text-sm'>
                     {item.coverImage ? (
@@ -589,8 +624,9 @@ export default function ProductsAdminPage() {
                       <span className='text-gray-400'>--</span>
                     )}
                   </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{item.title}</td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{item.slug}</td>
+                  <td className='px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate' title={item.title}>{item.title}</td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{item.category ? (categoryMap[item.category] || item.category) : '--'}</td>
+                  <td className='px-6 py-4 text-sm text-gray-500 max-w-[160px] truncate' title={item.slug}>{item.slug}</td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{renderPrice(item)}</td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm'>
                     <span className={`inline-flex px-2 py-1 text-xs rounded-full ${item.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
@@ -598,7 +634,7 @@ export default function ProductsAdminPage() {
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{item.sortOrder}</td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm space-x-2'>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm space-x-2 sticky right-0 bg-white z-10'>
                     <button onClick={() => openEdit(item)} className='text-sky-600 hover:text-sky-800 font-medium inline-flex items-center gap-1'>
                       <Pencil className='w-3 h-3' />
                       {'\u7f16\u8f91'}
@@ -610,14 +646,14 @@ export default function ProductsAdminPage() {
                   </td>
                 </tr>
               ))}
-              {products.length === 0 && !loading && (
+              {filteredProducts.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7} className='px-6 py-4 text-center text-sm text-gray-500'>{'\u6682\u65e0\u6570\u636e\uff0c\u70b9\u51fb\u53f3\u4e0a\u89d2\u65b0\u5efa\u4ea7\u54c1\u6dfb\u52a0'}</td>
+                  <td colSpan={8} className='px-6 py-4 text-center text-sm text-gray-500'>{'\u6682\u65e0\u6570\u636e\uff0c\u70b9\u51fb\u53f3\u4e0a\u89d2\u65b0\u5efa\u4ea7\u54c1\u6dfb\u52a0'}</td>
                 </tr>
               )}
               {loading && (
                 <tr>
-                  <td colSpan={7} className='px-6 py-4 text-center text-sm text-gray-500'>{'\u52a0\u8f7d\u4e2d...'}</td>
+                  <td colSpan={8} className='px-6 py-4 text-center text-sm text-gray-500'>{'\u52a0\u8f7d\u4e2d...'}</td>
                 </tr>
               )}
             </tbody>
@@ -740,6 +776,21 @@ export default function ProductsAdminPage() {
                       placeholder='URL 标识，如: hydraulic-press'
                       required
                     />
+                  </div>
+
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>{'产品分类'}</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className={selectCls}
+                    >
+                      <option value=''>{'未分类'}</option>
+                      <option value='PVC_FOAM'>{'PVC发泡材料'}</option>
+                      <option value='PVC_MATS'>{'PVC地垫'}</option>
+                      <option value='TABLE_PROTECTOR'>{'桌垫保护垫'}</option>
+                      <option value='SOUNDCOTTON'>{'隔音棉'}</option>
+                    </select>
                   </div>
 
                   <div className='grid grid-cols-2 gap-4'>

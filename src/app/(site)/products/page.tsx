@@ -1,15 +1,14 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { isVer4Theme, isVer3Theme, isVer5Theme, isVer6Theme } from '@/lib/theme'
 import { getServerLocale } from '@/lib/i18n-server'
 import { getTranslation } from '@/lib/dictionary'
 import { getSiteSeo } from '@/lib/seo'
-import { getLocalizedValue } from '@/lib/i18n'
+import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import { PRODUCTS_PAGE_SEO } from '@/lib/category-seo'
 import SectionHeader from '@/components/site/SectionComponents'
-import AddToInquiryButton from '@/components/site/AddToInquiryButton'
 
 async function getProducts() {
   try {
@@ -28,6 +27,7 @@ async function getProducts() {
         summaryEs: true,
         summaryAr: true,
         coverImage: true,
+        category: true,
       },
     })
     return products
@@ -40,47 +40,44 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const seo = await getSiteSeo(locale)
+  // Use keyword-optimized SEO for English
+  const pageSeo = locale === 'en' ? PRODUCTS_PAGE_SEO : undefined
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
   return {
-    title: seo?.defaultSeoTitle || `${t('products')} - Shimond`,
-    description: seo?.defaultSeoDescription || t('products.subtitle'),
-    keywords: seo?.defaultSeoKeywords || undefined,
+    title: pageSeo?.title || seo?.defaultSeoTitle || `${t('products')} - Shimond`,
+    description: pageSeo?.description || seo?.defaultSeoDescription || t('products.subtitle'),
+    keywords: pageSeo?.keywords || seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/products`,
+    },
   }
 }
-
-const fallbackProducts = [
-  {
-    id: '1',
-    title: 'PVC Leather',
-    slug: 'pvc-leather',
-    summary: 'Premium synthetic leather with excellent durability, water resistance, and soft touch.',
-    coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'PVC Mats',
-    slug: 'pvc-mats',
-    summary: 'High-quality PVC floor mats and carpets with anti-slip backing.',
-    coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Table Protector',
-    slug: 'table-protector',
-    summary: 'Crystal clear PVC table mats to protect your furniture from damage.',
-    coverImage: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&h=450&fit=crop',
-  },
-]
 
 export default async function ProductsPage() {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const products = await getProducts()
-  const display = products.length > 0 ? products : fallbackProducts
 
-  if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/ProductsPage'); return <C locale={locale} products={display} /> }
-  if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/ProductsPage'); return <C locale={locale} products={display} /> }
-  if (isVer5Theme()) { const { default: C } = await import('@/themes/ver5/ProductsPage'); return <C locale={locale} products={display} /> }
-  if (isVer6Theme()) { const { default: C } = await import('@/themes/ver6/ProductsPage'); return <C locale={locale} products={display} /> }
+  // Group product counts by category enum value
+  const countByEnum = new Map<string, number>()
+  for (const p of products) {
+    if (p.category) {
+      countByEnum.set(p.category, (countByEnum.get(p.category) || 0) + 1)
+    }
+  }
+
+  // Build category list with counts (always show all 4 categories, 0 if empty)
+  const categories = PRODUCT_CATEGORIES.map((c) => ({
+    slug: c.slug,
+    labelKey: c.labelKey,
+    count: countByEnum.get(c.enumValue) || 0,
+  }))
+
+  if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/ProductsPage'); return <C locale={locale} categories={categories} /> }
+  if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/ProductsPage'); return <C locale={locale} categories={categories} /> }
+  if (isVer5Theme()) { const { default: C } = await import('@/themes/ver5/ProductsPage'); return <C locale={locale} categories={categories} /> }
+  if (isVer6Theme()) { const { default: C } = await import('@/themes/ver6/ProductsPage'); return <C locale={locale} categories={categories} /> }
 
   return (
     <div className="pt-[5rem] pb-20">
@@ -91,45 +88,20 @@ export default async function ProductsPage() {
           subtitle={t('products.subtitle')}
         />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {display.map((product: { id: string; title: string; slug: string; summary: string | null; coverImage: string | null }) => (
-            <article
-              key={product.id}
-              className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/products/category/${category.slug}`}
+              className="group bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 flex flex-col"
             >
-              <div className="relative aspect-[4/3] overflow-hidden group">
-                <Image
-                  fill
-                  src={product.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop'}
-                  alt={product.title}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{getLocalizedValue(product, locale, 'title') || product.title}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{getLocalizedValue(product, locale, 'summary') || product.summary || ''}</p>
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="inline-flex items-center space-x-2 text-sky-500 font-semibold hover:text-sky-600 transition-colors"
-                  >
-                    <span>{t('viewDetails')}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <AddToInquiryButton
-                    product={{
-                      id: product.id,
-                      slug: product.slug,
-                      title: getLocalizedValue(product, locale, 'title') || product.title,
-                      coverImage: product.coverImage,
-                      summary: getLocalizedValue(product, locale, 'summary') || product.summary,
-                    }}
-                    variant="icon"
-                  />
-                </div>
-              </div>
-            </article>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t(category.labelKey)}</h3>
+              <p className="text-gray-500 mb-6">{category.count} {t('products')}</p>
+              <span className="mt-auto inline-flex items-center space-x-2 text-sky-500 font-semibold group-hover:text-sky-600 transition-colors">
+                <span>{t('viewDetails')}</span>
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
           ))}
         </div>
       </div>
