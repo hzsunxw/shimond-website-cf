@@ -2,11 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -38,6 +39,13 @@ enum CodeType {
   HTML
   CSS
   JAVASCRIPT
+}
+
+enum ProductCategory {
+  PVC_FOAM
+  PVC_MATS
+  TABLE_PROTECTOR
+  SOUNDCOTTON
 }
 
 enum InjectionPosition {
@@ -80,7 +88,7 @@ model AdminUser {
 model Template {
   id          String   @id @default(uuid())
   name        String
-  description String?  @db.Text
+  description String? 
   coverImage  String?  @map("cover_image")
   identifier  String   @unique
   status      Status   @default(ACTIVE)
@@ -106,8 +114,8 @@ model SiteConfig {
   secondaryColor  String  @default("#f59e0b") @map("secondary_color")
   accentColor     String  @default("#10b981") @map("accent_color")
   siteTitle       String  @map("site_title")
-  siteDescription String? @map("site_description") @db.Text
-  footerInfo      String? @map("footer_info") @db.Text
+  siteDescription String? @map("site_description")
+  footerInfo      String? @map("footer_info")
 
   phone     String?
   email     String?
@@ -120,7 +128,7 @@ model SiteConfig {
   defaultLanguage String @default("en") @map("default_language")
 
   defaultSeoTitle       String? @map("default_seo_title")
-  defaultSeoDescription String? @map("default_seo_description") @db.Text
+  defaultSeoDescription String? @map("default_seo_description")
   defaultSeoKeywords    String? @map("default_seo_keywords")
   defaultOgImage        String? @map("default_og_image")
   favicon               String?
@@ -152,15 +160,15 @@ model SiteSeoConfig {
   languageCode          String  @map("language_code")
   companyName           String? @map("company_name")
   siteTitle             String? @map("site_title")
-  siteDescription       String? @map("site_description") @db.Text
+  siteDescription       String? @map("site_description")
   defaultSeoTitle       String? @map("default_seo_title")
-  defaultSeoDescription String? @map("default_seo_description") @db.Text
+  defaultSeoDescription String? @map("default_seo_description")
   defaultSeoKeywords    String? @map("default_seo_keywords")
   defaultOgImage        String? @map("default_og_image")
   favicon               String?
 
   // Contact info (per-language)
-  address               String? @db.Text
+  address               String?
   phone                 String?
   email                 String?
 
@@ -184,16 +192,16 @@ model Page {
   showInNav Boolean @default(true) @map("show_in_nav")
 
   seoTitle       String? @map("seo_title")
-  seoDescription String? @map("seo_description") @db.Text
+  seoDescription String? @map("seo_description")
   seoKeywords    String? @map("seo_keywords")
   seoTitleEn       String? @map("seo_title_en")
-  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoDescriptionEn String? @map("seo_description_en")
   seoKeywordsEn    String? @map("seo_keywords_en")
   seoTitleEs       String? @map("seo_title_es")
-  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoDescriptionEs String? @map("seo_description_es")
   seoKeywordsEs    String? @map("seo_keywords_es")
   seoTitleAr       String? @map("seo_title_ar")
-  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoDescriptionAr String? @map("seo_description_ar")
   seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
   schemaOrg      Json?   @map("schema_org")
@@ -216,7 +224,7 @@ model PageModule {
   moduleType String  @map("module_type")
   title      String?
   subtitle   String?
-  config     Json    @default("{}")
+  config     Json   
 
   sortOrder   Int     @default(0) @map("sort_order")
   isVisible   Boolean @default(true) @map("is_visible")
@@ -255,47 +263,48 @@ model ServiceItem {
   titleEs     String?  @map("title_es")
   titleAr     String?  @map("title_ar")
   slug        String   @unique
-  summary     String?  @db.Text
-  summaryEn   String?  @map("summary_en") @db.Text
-  summaryEs   String?  @map("summary_es") @db.Text
-  summaryAr   String?  @map("summary_ar") @db.Text
+  summary     String? 
+  summaryEn   String?  @map("summary_en")
+  summaryEs   String?  @map("summary_es")
+  summaryAr   String?  @map("summary_ar")
 
   coverImage String? @map("cover_image")
-  gallery    Json?   @default("[]")
+  gallery    Json?  
 
-  description   String? @db.Text
-  descriptionEn String? @map("description_en") @db.Text
-  descriptionEs String? @map("description_es") @db.Text
-  descriptionAr String? @map("description_ar") @db.Text
+  description   String?
+  descriptionEn String? @map("description_en")
+  descriptionEs String? @map("description_es")
+  descriptionAr String? @map("description_ar")
 
-  price         Decimal? @db.Decimal(10, 2)
+  price         Decimal?
   priceUnit     String?  @map("price_unit")
   priceCurrency String?  @default("USD") @map("price_currency")
   priceStrategy PriceDisplayStrategy @default(CONTACT) @map("price_strategy")
 
-  features    String[] @default([])
-  featuresEn  String[] @default([]) @map("features_en")
-  featuresEs  String[] @default([]) @map("features_es")
-  featuresAr  String[] @default([]) @map("features_ar")
-  specs       Json?    @default("[]")
-  specsEn     Json?    @default("[]") @map("specs_en")
-  specsEs     Json?    @default("[]") @map("specs_es")
-  specsAr     Json?    @default("[]") @map("specs_ar")
+  features    Json    
+  featuresEn  Json     @map("features_en")
+  featuresEs  Json     @map("features_es")
+  featuresAr  Json     @map("features_ar")
+  specs       Json?   
+  specsEn     Json?    @map("specs_en")
+  specsEs     Json?    @map("specs_es")
+  specsAr     Json?    @map("specs_ar")
 
   sortOrder Int    @default(0) @map("sort_order")
   status    Status @default(ACTIVE)
+  category  ProductCategory? @map("category")
 
   seoTitle       String? @map("seo_title")
-  seoDescription String? @map("seo_description") @db.Text
+  seoDescription String? @map("seo_description")
   seoKeywords    String? @map("seo_keywords")
   seoTitleEn       String? @map("seo_title_en")
-  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoDescriptionEn String? @map("seo_description_en")
   seoKeywordsEn    String? @map("seo_keywords_en")
   seoTitleEs       String? @map("seo_title_es")
-  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoDescriptionEs String? @map("seo_description_es")
   seoKeywordsEs    String? @map("seo_keywords_es")
   seoTitleAr       String? @map("seo_title_ar")
-  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoDescriptionAr String? @map("seo_description_ar")
   seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
 
@@ -318,29 +327,30 @@ model CaseItem {
   slug          String  @unique
   clientName    String? @map("client_name")
   coverImage    String? @map("cover_image")
-  summary       String? @db.Text
-  summaryEn     String? @map("summary_en") @db.Text
-  summaryEs     String? @map("summary_es") @db.Text
-  summaryAr     String? @map("summary_ar") @db.Text
-  description   String? @db.Text
-  descriptionEn String? @map("description_en") @db.Text
-  descriptionEs String? @map("description_es") @db.Text
-  descriptionAr String? @map("description_ar") @db.Text
+  summary       String?
+  summaryEn     String? @map("summary_en")
+  summaryEs     String? @map("summary_es")
+  summaryAr     String? @map("summary_ar")
+  description   String?
+  descriptionEn String? @map("description_en")
+  descriptionEs String? @map("description_es")
+  descriptionAr String? @map("description_ar")
 
   sortOrder Int    @default(0) @map("sort_order")
   status    Status @default(ACTIVE)
+  category  ProductCategory? @map("category")
 
   seoTitle       String? @map("seo_title")
-  seoDescription String? @map("seo_description") @db.Text
+  seoDescription String? @map("seo_description")
   seoKeywords    String? @map("seo_keywords")
   seoTitleEn       String? @map("seo_title_en")
-  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoDescriptionEn String? @map("seo_description_en")
   seoKeywordsEn    String? @map("seo_keywords_en")
   seoTitleEs       String? @map("seo_title_es")
-  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoDescriptionEs String? @map("seo_description_es")
   seoKeywordsEs    String? @map("seo_keywords_es")
   seoTitleAr       String? @map("seo_title_ar")
-  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoDescriptionAr String? @map("seo_description_ar")
   seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
 
@@ -359,35 +369,35 @@ model NewsItem {
   titleEs   String? @map("title_es")
   titleAr   String? @map("title_ar")
   slug      String  @unique
-  summary   String? @db.Text
-  summaryEn String? @map("summary_en") @db.Text
-  summaryEs String? @map("summary_es") @db.Text
-  summaryAr String? @map("summary_ar") @db.Text
+  summary   String?
+  summaryEn String? @map("summary_en")
+  summaryEs String? @map("summary_es")
+  summaryAr String? @map("summary_ar")
   coverImage String? @map("cover_image")
-  content   String? @db.Text
-  contentEn String? @map("content_en") @db.Text
-  contentEs String? @map("content_es") @db.Text
-  contentAr String? @map("content_ar") @db.Text
+  content   String?
+  contentEn String? @map("content_en")
+  contentEs String? @map("content_es")
+  contentAr String? @map("content_ar")
   author    String?
-  tags      String[]
-  tagsEn    String[]  @map("tags_en")
-  tagsEs    String[]  @map("tags_es")
-  tagsAr    String[]  @map("tags_ar")
+  tags      Json     
+  tagsEn    Json      @map("tags_en")
+  tagsEs    Json      @map("tags_es")
+  tagsAr    Json      @map("tags_ar")
 
   publishAt DateTime? @map("publish_at")
   status    Status    @default(INACTIVE)
 
   seoTitle       String? @map("seo_title")
-  seoDescription String? @map("seo_description") @db.Text
+  seoDescription String? @map("seo_description")
   seoKeywords    String? @map("seo_keywords")
   seoTitleEn       String? @map("seo_title_en")
-  seoDescriptionEn String? @map("seo_description_en") @db.Text
+  seoDescriptionEn String? @map("seo_description_en")
   seoKeywordsEn    String? @map("seo_keywords_en")
   seoTitleEs       String? @map("seo_title_es")
-  seoDescriptionEs String? @map("seo_description_es") @db.Text
+  seoDescriptionEs String? @map("seo_description_es")
   seoKeywordsEs    String? @map("seo_keywords_es")
   seoTitleAr       String? @map("seo_title_ar")
-  seoDescriptionAr String? @map("seo_description_ar") @db.Text
+  seoDescriptionAr String? @map("seo_description_ar")
   seoKeywordsAr    String? @map("seo_keywords_ar")
   ogImage        String? @map("og_image")
   canonicalUrl   String? @map("canonical_url")
@@ -429,7 +439,7 @@ model Translation {
   languageId String   @map("language_id")
   language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
 
-  content String            @db.Text
+  content String           
   status  TranslationStatus @default(UNTRANSLATED)
 
   pageModuleId String?     @map("page_module_id")
@@ -447,7 +457,7 @@ model Translation {
 model CodeSnippet {
   id       String            @id @default(cuid())
   name     String
-  code     String            @db.Text
+  code     String           
   type     CodeType          @default(HTML)
   position InjectionPosition
 
@@ -467,7 +477,7 @@ model ContactMessage {
   email     String
   company   String?
   product   String?
-  message   String  @db.Text
+  message   String 
   isRead    Boolean @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -485,21 +495,21 @@ model Order {
   customerCompany String? @map("customer_company")
   customerPhone   String? @map("customer_phone")
   customerEmail   String? @map("customer_email")
-  shippingAddress String? @map("shipping_address") @db.Text
+  shippingAddress String? @map("shipping_address")
 
   items OrderItem[]
 
-  totalAmount Decimal? @map("total_amount") @db.Decimal(12, 2)
+  totalAmount Decimal? @map("total_amount")
   currency    String   @default("USD")
 
   status           OrderStatus @default(PENDING)
   expectedDelivery DateTime?   @map("expected_delivery")
 
-  customerNote  String? @map("customer_note") @db.Text
-  adminNote     String? @map("admin_note") @db.Text
-  internalNotes Json?   @default("[]") @map("internal_notes")
+  customerNote  String? @map("customer_note")
+  adminNote     String? @map("admin_note")
+  internalNotes Json?   @map("internal_notes")
 
-  attachments Json? @default("[]")
+  attachments Json?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -518,7 +528,7 @@ model OrderItem {
   productName     String  @map("product_name")
   productSpec     String? @map("product_spec")
   quantity        Int
-  expectedPrice   Decimal? @map("expected_price") @db.Decimal(10, 2)
+  expectedPrice   Decimal? @map("expected_price")
   expectedUnit    String?  @map("expected_unit")
 
   createdAt DateTime @default(now()) @map("created_at")

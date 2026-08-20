@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { hashPassword } from '../src/lib/crypto'
 
 const prisma = new PrismaClient()
 
@@ -7,7 +7,7 @@ async function main() {
   console.log('🌱 Starting database seed...')
 
   // 创建默认管理员账号
-  const adminPassword = await bcrypt.hash('admin123', 10)
+  const adminPassword = await hashPassword('admin123')
   const admin = await prisma.adminUser.upsert({
     where: { username: 'admin' },
     update: {},
@@ -76,15 +76,15 @@ async function main() {
       secondaryColor: '#f59e0b',
       accentColor: '#10b981',
       defaultLanguage: 'en',
-      phone: '+86 571 88837923',
-      email: 'shimond06@shimond.net',
+      phone: '+86 18158194952',
+      email: 'service@shimondpvc.com',
       address: 'Building 22, New Material Industrial Park, Wanjiangnan Concentrated Area, Chizhou, Anhui, China',
       socialLinks: {
         tiktok: 'https://www.tiktok.com/@shimondpvc',
         facebook: 'https://www.facebook.com/shimondpvc',
         instagram: 'https://www.instagram.com/shimondpvc',
         linkedin: 'https://www.linkedin.com/company/shimond',
-        whatsapp: 'https://wa.me/8618072976280',
+        whatsapp: 'https://wa.me/8618158194952',
       },
     },
   })
