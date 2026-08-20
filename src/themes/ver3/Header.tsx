@@ -14,6 +14,13 @@ const navLinks = [
   { href: '/news', key: 'nav.news' },
 ]
 
+const productCategories = [
+  { href: '/products/category/pvc-foam', labelKey: 'product.category.pvcFoam' },
+  { href: '/products/category/pvc-mats', labelKey: 'product.category.pvcMats' },
+  { href: '/products/category/table-protector', labelKey: 'product.category.tableProtector' },
+  { href: '/products/category/soundproof-cotton', labelKey: 'product.category.soundproofCotton' },
+]
+
 const langs = [
   { code: 'zh', flag: '\u{1F1E8}\u{1F1F3}', key: 'lang.zh' },
   { code: 'en', flag: '\u{1F1FA}\u{1F1F8}', key: 'lang.en' },
@@ -29,6 +36,8 @@ export default function Header({ locale, siteName = 'Shimond' }: { locale: strin
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [productsOpen, setProductsOpen] = useState(false)
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const pathname = usePathname()
   const t = (k: string) => getTranslation(locale, k)
 
@@ -61,11 +70,31 @@ export default function Header({ locale, siteName = 'Shimond' }: { locale: strin
           </Link>
 
           <nav className="nav" aria-label="Primary">
-            {navLinks.map((l) => (
-              <Link key={l.href} href={l.href} className={`nav-link${isActive(l.href) ? ' is-active' : ''}`}>
-                {t(l.key)}
-              </Link>
-            ))}
+            {navLinks.map((l) => {
+              if (l.href === '/products') {
+                return (
+                  <div key={l.href} style={{ position: 'relative' }} onMouseEnter={() => setProductsOpen(true)} onMouseLeave={() => setProductsOpen(false)}>
+                    <Link href={l.href} className={`nav-link${isActive(l.href) ? ' is-active' : ''}`}>
+                      {t(l.key)}
+                    </Link>
+                    {productsOpen && (
+                      <div style={{ position: 'absolute', top: '100%', left: 0, minWidth: '180px', background: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', borderRadius: '8px', padding: '8px 0', zIndex: 100 }}>
+                        {productCategories.map((cat) => (
+                          <Link key={cat.href} href={cat.href} style={{ display: 'block', padding: '10px 20px', color: '#333', fontSize: '14px', textDecoration: 'none' }} onClick={() => setProductsOpen(false)}>
+                            {t(cat.labelKey)}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              return (
+                <Link key={l.href} href={l.href} className={`nav-link${isActive(l.href) ? ' is-active' : ''}`}>
+                  {t(l.key)}
+                </Link>
+              )
+            })}
           </nav>
 
           <div className="header-actions">
@@ -89,7 +118,7 @@ export default function Header({ locale, siteName = 'Shimond' }: { locale: strin
               </div>
             </div>
 
-            <Link href="/about#contact" className="btn btn--gradient">{t('nav.contact')}</Link>
+            <Link href="/contact" className="btn btn--gradient">{t('nav.contact')}</Link>
           </div>
 
           <button className={`menu-toggle${mobileOpen ? ' is-open' : ''}`} aria-label="Menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(v => !v)}>
@@ -100,11 +129,36 @@ export default function Header({ locale, siteName = 'Shimond' }: { locale: strin
 
       {mobileOpen && (
         <div className="mobile-nav is-open">
-          {navLinks.map((l) => (
-            <Link key={l.href} href={l.href} className={`nav-link${isActive(l.href) ? ' is-active' : ''}`} onClick={() => setMobileOpen(false)}>
-              {t(l.key)}
-            </Link>
-          ))}
+          {navLinks.map((l) => {
+            if (l.href === '/products') {
+              return (
+                <div key={l.href}>
+                  <button
+                    className={`nav-link${isActive(l.href) ? ' is-active' : ''}`}
+                    onClick={() => setMobileProductsOpen(v => !v)}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', textAlign: 'left' }}
+                  >
+                    {t(l.key)}
+                    <span style={{ fontSize: '12px' }}>{mobileProductsOpen ? '\u2212' : '+'}</span>
+                  </button>
+                  {mobileProductsOpen && (
+                    <div style={{ paddingLeft: '16px' }}>
+                      {productCategories.map((cat) => (
+                        <Link key={cat.href} href={cat.href} className="nav-link" style={{ display: 'block', fontSize: '13px', opacity: '0.8' }} onClick={() => { setMobileOpen(false); setMobileProductsOpen(false) }}>
+                          {t(cat.labelKey)}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+            return (
+              <Link key={l.href} href={l.href} className={`nav-link${isActive(l.href) ? ' is-active' : ''}`} onClick={() => setMobileOpen(false)}>
+                {t(l.key)}
+              </Link>
+            )
+          })}
           <div className="mobile-lang-grid">
             {langs.map((l) => (
               <button key={l.code} className={`lang-option${locale === l.code ? ' is-active' : ''}`} onClick={() => pickLang(l.code)}>

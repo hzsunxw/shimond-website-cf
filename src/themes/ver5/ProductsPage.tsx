@@ -1,27 +1,12 @@
 import Link from 'next/link'
 import { getTranslation } from '@/lib/dictionary'
-import { getLocalizedValue } from '@/lib/i18n'
-
-interface ProductItem {
-  id: string
-  title: string
-  slug: string
-  summary: string | null
-  coverImage: string | null
-  titleEn?: string | null
-  titleEs?: string | null
-  titleAr?: string | null
-  summaryEn?: string | null
-  summaryEs?: string | null
-  summaryAr?: string | null
-}
 
 interface ProductsPageProps {
   locale: string
-  products: ProductItem[]
+  categories: { slug: string; labelKey: string; count: number }[]
 }
 
-export default function ProductsPage({ locale, products }: ProductsPageProps) {
+export default function ProductsPage({ locale, categories }: ProductsPageProps) {
   const t = (key: string) => getTranslation(locale, key)
 
   return (
@@ -37,30 +22,25 @@ export default function ProductsPage({ locale, products }: ProductsPageProps) {
         </div>
       </section>
 
-      {/* ============================ CATALOG ============================ */}
+      {/* ============================ CATEGORIES ============================ */}
       <section className="section" id="catalog">
         <div className="container">
           <div className="products-grid">
-            {products.map((product) => {
-              const title = getLocalizedValue(product, locale, 'title') || product.title
-              const summary = getLocalizedValue(product, locale, 'summary') || product.summary || ''
-              const cover = product.coverImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop'
+            {categories.map((category) => {
+              const name = t(category.labelKey)
               return (
-                <article key={product.id} className="product-card">
-                  <div className="product-media">
-                    <img src={cover} alt={title} loading="lazy" />
-                  </div>
+                <Link key={category.slug} href={`/products/category/${category.slug}`} className="product-card">
                   <div className="product-body">
-                    <h3 className="product-title">{title}</h3>
-                    <p className="product-desc">{summary}</p>
-                    <Link href={`/products/${product.slug}`} className="product-link">
+                    <h3 className="product-title">{name}</h3>
+                    <p className="product-desc">{category.count} {t('products')}</p>
+                    <span className="product-link">
                       <span>{t('viewDetails')}</span>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                         <path d="M5 12h14M13 6l6 6-6 6" />
                       </svg>
-                    </Link>
+                    </span>
                   </div>
-                </article>
+                </Link>
               )
             })}
           </div>
@@ -73,7 +53,7 @@ export default function ProductsPage({ locale, products }: ProductsPageProps) {
           <div className="cta-inner">
             <h2 className="cta-title">{t('products.cta.title')}</h2>
             <p className="cta-desc">{t('products.cta.desc')}</p>
-            <Link href="/about#contact" className="btn btn--accent btn--lg">
+            <Link href="/contact" className="btn btn--accent btn--lg">
               <span>{t('contact')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M5 12h14M13 6l6 6-6 6" />

@@ -28,44 +28,24 @@ const CTA_TITLE: Record<string, string> = {
   ar: 'هل تريد أن تكون قصة نجاحنا التالية؟',
 }
 
-const fallbackCases = [
-  {
-    id: '1',
-    title: 'European Furniture PVC Leather Case Study',
-    slug: 'europe-furniture-leather',
-    clientName: 'EuroFurn Co.',
-    summary: 'EuroFurn Co. faced high costs of genuine leather. We customized PVC leather solution, annual volume 500,000+ meters, reducing costs 35% and lead time 40%.',
-    coverImage: 'https://images.unsplash.com/photo-1607646175036-fdba5063cfed?w=600&h=450&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'European Furniture Brand Collaboration',
-    slug: 'europe-furniture',
-    clientName: 'EuroFurn Co.',
-    summary: 'Providing high-quality PVC synthetic leather for European furniture brands for sofa and seat manufacturing.',
-    coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Automotive Interior Project',
-    slug: 'automotive-interior',
-    clientName: 'AutoTech Inc.',
-    summary: 'Supplied wear-resistant, eco-friendly PVC interior materials for automotive manufacturers.',
-    coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-  },
-  {
-    id: '4',
-    title: 'Commercial Flooring Project',
-    slug: 'commercial-flooring',
-    clientName: 'BuildRight Ltd.',
-    summary: 'Large-scale commercial space PVC mat supply project covering over 5,000 square meters.',
-    coverImage: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&h=450&fit=crop',
-  },
-]
+type CaseItem = {
+  id: string
+  title: string
+  titleEn: string | null
+  titleEs: string | null
+  titleAr: string | null
+  slug: string
+  clientName: string | null
+  summary: string | null
+  summaryEn: string | null
+  summaryEs: string | null
+  summaryAr: string | null
+  coverImage: string | null
+}
 
-export default function CasesPage({ locale, cases }: { locale: string; cases: typeof fallbackCases }) {
+export default function CasesPage({ locale, cases }: { locale: string; cases: CaseItem[] }) {
   const t = (key: string) => getTranslation(locale, key)
-  const display = cases.length > 0 ? cases : fallbackCases
+  const display = cases
 
   const statCountries = STAT_COUNTRIES[locale] || STAT_COUNTRIES.en
   const statMeters = STAT_METERS[locale] || STAT_METERS.en
@@ -141,7 +121,7 @@ export default function CasesPage({ locale, cases }: { locale: string; cases: ty
         <div className="container">
           <div className="cta-inner">
             <h2 className="cta-title">{ctaTitle}</h2>
-            <Link href="/about#contact" className="btn btn--gradient btn--lg">
+            <Link href="/contact" className="btn btn--gradient btn--lg">
               <span>{t('contact')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M5 12h14M13 6l6 6-6 6" />

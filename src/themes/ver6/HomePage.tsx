@@ -25,7 +25,7 @@ export default function HomePage({ locale, products, config }: HomePageProps) {
             <p className="hero-sub">{t('hero.subtitle')}</p>
             <div className="hero-cta-row">
               <Link href="/products" className="btn btn--accent btn--lg"><span>{t('hero.cta1')}</span>{ArrowSvg}</Link>
-              <Link href="/about#contact" className="btn btn--outline-light btn--lg">{t('hero.cta2')}</Link>
+              <Link href="/contact" className="btn btn--outline-light btn--lg">{t('hero.cta2')}</Link>
             </div>
             <div className="hero-stats">
               <div className="hero-stat"><div className="hero-stat-num">15+</div><div className="hero-stat-label">{t('hero.stats.years')}</div></div>
@@ -75,7 +75,7 @@ export default function HomePage({ locale, products, config }: HomePageProps) {
           <div className="about-copy">
             <h2 className="section-title section-title--left">{t('about.title')}</h2>
             <p>{t('about.desc1')}</p><p>{t('about.desc2')}</p>
-            <Link href="/about#contact" className="btn btn--dark btn--lg"><span>{t('about.cta')}</span>{ArrowSvg}</Link>
+            <Link href="/contact" className="btn btn--dark btn--lg"><span>{t('about.cta')}</span>{ArrowSvg}</Link>
           </div>
           <div className="about-visual"><div className="about-media"><img src="https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=600&h=600&fit=crop" alt="Factory" loading="lazy" /></div></div>
         </div>

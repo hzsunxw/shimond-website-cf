@@ -64,7 +64,7 @@ export default function Layout({
                 <li><Link href="/products">{t('footer.product.pvcLeather')}</Link></li>
                 <li><Link href="/products">{t('footer.product.pvcMats')}</Link></li>
                 <li><Link href="/products">{t('footer.product.tableProtector')}</Link></li>
-                <li><Link href="/about#contact">{t('footer.customOrders')}</Link></li>
+                <li><Link href="/contact">{t('footer.customOrders')}</Link></li>
               </ul>
             </div>
 
@@ -74,8 +74,9 @@ export default function Layout({
                 <li><Link href="/">{t('nav.home')}</Link></li>
                 <li><Link href="/products">{t('nav.products')}</Link></li>
                 <li><Link href="/cases">{t('nav.cases')}</Link></li>
-                <li><Link href="/news">{t('nav.news')}</Link></li>
-                <li><Link href="/about#contact">{t('nav.contact')}</Link></li>
+<li><Link href="/news">{t('nav.news')}</Link></li>
+  <li><Link href="/shipping-policy">{t('shippingPolicy')}</Link></li>
+  <li><Link href="/contact">{t('nav.contact')}</Link></li>
               </ul>
             </div>
 

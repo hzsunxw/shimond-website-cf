@@ -126,7 +126,7 @@ export default function NewsPage({ locale, news }: { locale: string; news: typeo
           <div className="cta-inner">
             <h2 className="cta-title">{ctaTitle}</h2>
             <p className="cta-desc">{ctaDesc}</p>
-            <Link href="/about#contact" className="btn btn--accent btn--lg">
+            <Link href="/contact" className="btn btn--accent btn--lg">
               <span>{t('contact')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M5 12h14M13 6l6 6-6 6" />

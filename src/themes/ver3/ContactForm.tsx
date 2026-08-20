@@ -126,9 +126,10 @@ export default function ContactForm({ locale }: ContactFormProps) {
             onChange={(e) => setFormData({ ...formData, product: e.target.value })}
           >
             <option value="">{t('contact.selectProduct')}</option>
-            <option value="pvc-leather">{t('product.pvcLeather')}</option>
-            <option value="pvc-mats">{t('product.pvcMats')}</option>
-            <option value="table-protector">{t('product.tableProtector')}</option>
+            <option value="pvc-foam">{t('product.category.pvcFoam')}</option>
+            <option value="pvc-mats">{t('product.category.pvcMats')}</option>
+            <option value="table-protector">{t('product.category.tableProtector')}</option>
+            <option value="soundproof-cotton">{t('product.category.soundproofCotton')}</option>
             <option value="other">{t('product.other')}</option>
           </select>
         </div>

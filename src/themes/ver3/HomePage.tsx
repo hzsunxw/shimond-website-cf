@@ -24,7 +24,7 @@ export default function HomePage({ locale, products, config }: HomePageProps) {
             <p className="hero-sub">{t('hero.subtitle')}</p>
             <div className="hero-cta-row">
               <Link href="/products" className="btn btn--gradient btn--lg"><span>{t('hero.cta1')}</span>{ArrowSvg}</Link>
-              <Link href="/about#contact" className="btn btn--ghost-light btn--lg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg><span>{t('hero.cta2')}</span></Link>
+              <Link href="/contact" className="btn btn--ghost-light btn--lg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg><span>{t('hero.cta2')}</span></Link>
             </div>
             <div className="hero-stats">
               <div><div className="hero-stat-num">15+</div><div className="hero-stat-label">{t('hero.stats.years')}</div></div>
@@ -70,7 +70,7 @@ export default function HomePage({ locale, products, config }: HomePageProps) {
         <div className="about-grid">
           <div className="about-visual"><div className="about-media"><img src="https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=600&h=600&fit=crop" alt="Shimond production facility" loading="lazy" /></div><div className="about-experience-badge"><div className="num">15+</div><div className="lbl">{t('hero.stats.years')}</div></div></div>
           <div className="about-copy">
-            <div><span className="eyebrow">{t('about.badge')}</span><h2 className="section-title">{t('about.title')}</h2><p>{t('about.desc1')}</p><p>{t('about.desc2')}</p><div style={{ marginTop: '1.75rem' }}><Link href="/about#contact" className="btn btn--gradient"><span>{t('about.cta')}</span>{ArrowSvg}</Link></div></div>
+            <div><span className="eyebrow">{t('about.badge')}</span><h2 className="section-title">{t('about.title')}</h2><p>{t('about.desc1')}</p><p>{t('about.desc2')}</p><div style={{ marginTop: '1.75rem' }}><Link href="/contact" className="btn btn--gradient"><span>{t('about.cta')}</span>{ArrowSvg}</Link></div></div>
             <div className="culture-grid">
               <div className="culture-card"><h4>{t('about.mission')}</h4><p>{t('about.mission.text')}</p></div>
               <div className="culture-card"><h4>{t('about.purpose')}</h4><p>{t('about.purpose.text')}</p></div>
