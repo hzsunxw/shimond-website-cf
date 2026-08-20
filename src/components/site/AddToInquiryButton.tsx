@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Check, ShoppingCart } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
+import { trackAddToInquiry } from '@/lib/gtag'
 
 interface AddToInquiryButtonProps {
   product: {
@@ -65,6 +66,7 @@ export default function AddToInquiryButton({ product, variant = 'primary' }: Add
     })
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    trackAddToInquiry(product.id, product.title)
     setAdded(true)
     setCount(items.length)
   }

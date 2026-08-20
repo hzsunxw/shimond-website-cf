@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Video, Facebook, Instagram, Linkedin, MessageCircle } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
+import SocialLink from './SocialLink'
 
 interface FooterProps {
   siteName?: string
@@ -17,8 +18,8 @@ export default function SiteFooter({
   siteName = 'Shimond',
   companyName = 'Shimond Industry Co., Ltd.',
   address = 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China',
-  phone = '+86 571 8273 8888',
-  email = 'info@shimond.com',
+  phone = '+86 18158194952',
+  email = 'service@shimondpvc.com',
   socialLinks,
 }: FooterProps) {
   const t = useTranslations()
@@ -59,17 +60,16 @@ export default function SiteFooter({
                 Object.entries(socialLinks)
                   .filter(([, url]) => url && String(url).trim())
                   .map(([key, url]) => (
-                    <a
+                    <SocialLink
                       key={key}
                       href={String(url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      platform={key}
                       className={`w-10 h-10 bg-white/10 rounded-full flex items-center justify-center transition-colors ${
                         socialColors[key] || 'hover:bg-sky-500'
                       }`}
                     >
                       {socialIcons[key] || <span className="text-xs">{key[0].toUpperCase()}</span>}
-                    </a>
+                    </SocialLink>
                   ))}
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function SiteFooter({
                 </Link>
               </li>
               <li>
-                <Link href="/about#contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.customOrders')}
                 </Link>
               </li>
@@ -126,7 +126,12 @@ export default function SiteFooter({
                 </Link>
               </li>
               <li>
-                <Link href="/about#contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/shipping-policy" className="text-gray-400 hover:text-white transition-colors">
+                  {t('shippingPolicy')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
                   {t('contact')}
                 </Link>
               </li>

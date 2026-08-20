@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { getServerLocale } from '@/lib/i18n-server'
+import GA4 from '@/components/analytics/GA4'
+import Clarity from '@/components/analytics/Clarity'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -30,6 +32,8 @@ export default async function RootLayout({
     <html lang={lang} dir={dir}>
       <body className={inter.className}>
         {children}
+        <GA4 />
+        <Clarity />
       </body>
     </html>
   )

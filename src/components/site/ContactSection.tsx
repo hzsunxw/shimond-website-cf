@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Video, Facebook, Instagram, Linkedin, MessageCircl
 import SectionHeader from './SectionComponents'
 import ContactForm from './ContactForm'
 import { useTranslations } from '@/lib/translations'
+import SocialLink from './SocialLink'
 
 interface ContactSectionProps {
   address?: string | null
@@ -76,17 +77,16 @@ export default function ContactSection({ address, phone, email, socialLinks }: C
                 <h3 className="text-lg font-bold text-gray-900 mb-4">{t('contact.followUs')}</h3>
                 <div className="flex space-x-4">
                   {Object.entries(socialLinks).map(([key, url]) => (
-                    <a
+                    <SocialLink
                       key={key}
                       href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      platform={key}
                       className={`w-12 h-12 rounded-full flex items-center justify-center text-white transition-transform ${
                         socialColors[key] || 'bg-gray-500 hover:scale-110'
                       }`}
                     >
                       {socialIcons[key] || <span className="text-xs uppercase">{key[0]}</span>}
-                    </a>
+                    </SocialLink>
                   ))}
                 </div>
               </div>

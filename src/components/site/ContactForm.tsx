@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Send, CheckCircle } from 'lucide-react'
 import { useTranslations } from '@/lib/translations'
+import { trackLead } from '@/lib/gtag'
 
 export default function ContactForm() {
   const t = useTranslations()
@@ -29,6 +30,7 @@ export default function ContactForm() {
       })
 
       if (res.ok) {
+        trackLead('contact_form')
         setSubmitted(true)
       } else {
         const err = await res.json()
@@ -97,9 +99,10 @@ export default function ContactForm() {
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
           >
             <option value="">{t('contact.selectProduct')}</option>
-            <option value="pvc-leather">{t('product.pvcLeather')}</option>
-            <option value="pvc-mats">{t('product.pvcMats')}</option>
-            <option value="table-protector">{t('product.tableProtector')}</option>
+            <option value="pvc-foam">{t('product.category.pvcFoam')}</option>
+            <option value="pvc-mats">{t('product.category.pvcMats')}</option>
+            <option value="table-protector">{t('product.category.tableProtector')}</option>
+            <option value="soundproof-cotton">{t('product.category.soundproofCotton')}</option>
             <option value="other">{t('product.other')}</option>
           </select>
         </div>
