@@ -11,7 +11,7 @@ export default async function LanguagesPage() {
         <h2 className="text-lg font-semibold text-gray-900">多语言管理</h2>
       </header>
       <div className="p-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -27,7 +27,7 @@ export default async function LanguagesPage() {
               {languages.map((lang: any) => (
                 <tr key={lang.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{lang.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lang.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={lang.name}>{lang.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lang.icon || '--'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lang.isRtl ? '是' : '否'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lang.isActive ? '是' : '否'}</td>

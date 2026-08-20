@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { verifyPassword } from '@/lib/crypto'
 import { SignJWT } from 'jose'
 
 export async function POST(request: Request) {
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // 验证密码
-    const isValid = await bcrypt.compare(password, user.password)
+    // 验证密码 (PBKDF2 via Web Crypto)
+    const isValid = await verifyPassword(password, user.password)
 
     if (!isValid) {
       return NextResponse.json(

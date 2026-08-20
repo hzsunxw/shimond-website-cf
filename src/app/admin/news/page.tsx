@@ -573,7 +573,7 @@ export default function NewsAdminPage() {
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>发布时间</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>状态</th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>标签</th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>操作</th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 z-10'>操作</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
@@ -591,7 +591,7 @@ export default function NewsAdminPage() {
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{item.tags?.join(', ') || '--'}</td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm space-x-2'>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm space-x-2 sticky right-0 bg-white z-10'>
                     <button onClick={() => openEdit(item)} className='text-sky-600 hover:text-sky-800 font-medium inline-flex items-center gap-1'>
                       <Pencil className='w-3 h-3' />
                       编辑

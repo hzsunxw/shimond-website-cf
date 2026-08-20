@@ -1,6 +1,7 @@
-import { prisma } from '@/lib/prisma'
+import { getDb } from '@/lib/prisma'
 
 export default async function AdminPage() {
+  const prisma = getDb()
   const [productCount, orderCount, newsCount, caseCount] = await Promise.all([
     prisma.serviceItem.count(),
     prisma.order.count(),

@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-
-// 上传目录：优先用环境变量，否则回退到项目根目录的 public/uploads
-// standalone 模式下 process.cwd() 是 .next/standalone，需向上回溯两级
-function getUploadsDir() {
-  if (process.env.UPLOADS_DIR) return process.env.UPLOADS_DIR
-  return join(process.cwd(), '..', '..', 'public', 'uploads')
-}
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export async function POST(request: Request) {
   try {
@@ -28,20 +20,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '文件超过 5MB' }, { status: 400 })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
     // 生成文件名: timestamp-originalname
     const timestamp = Date.now()
     const originalName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_')
     const filename = `${timestamp}-${originalName}`
 
-    const uploadDir = getUploadsDir()
-    const filepath = join(uploadDir, filename)
-
-    // 确保上传目录存在
-    await mkdir(uploadDir, { recursive: true })
-    await writeFile(filepath, buffer)
+    // 上传到 R2
+    const { env } = getCloudflareContext()
+    await env.BUCKET.put(filename, await file.arrayBuffer(), {
+      httpMetadata: { contentType: file.type },
+    })
 
     const url = `/api/uploads/${filename}`
     return NextResponse.json({ url })

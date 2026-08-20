@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { parseAcceptLanguage } from '@/lib/locale-utils'
 
-const ADMIN_PATH = (process.env.NEXT_PUBLIC_ADMIN_PATH || '/admin').replace(/\/$/, '')
+const ADMIN_PATH = ('/' + (process.env.NEXT_PUBLIC_ADMIN_PATH || 'admin')).replace(/\/+$/, '')
 const LOGIN_PATH = `${ADMIN_PATH}/login`
 
 function detectLocale(request: NextRequest): string {
@@ -33,6 +33,14 @@ export function middleware(request: NextRequest) {
 
     if (!token) {
       return NextResponse.redirect(new URL(LOGIN_PATH, request.url))
+    }
+  }
+
+  // 已登录用户访问登录页，重定向到后台首页
+  if (pathname === LOGIN_PATH) {
+    const token = request.cookies.get('admin-token')?.value
+    if (token) {
+      return NextResponse.redirect(new URL(ADMIN_PATH, request.url))
     }
   }
 

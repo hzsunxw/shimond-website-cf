@@ -11,13 +11,14 @@ function getLocalizedValue(item: Record<string, any>, locale: string, field: str
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params
   try {
     const locale = (request.headers.get('x-locale') as string) || 'en'
     
     const newsItem = await prisma.newsItem.findUnique({
-      where: { slug: params.slug, status: 'ACTIVE' },
+      where: { slug: slug, status: 'ACTIVE' },
     })
     
     if (!newsItem) {

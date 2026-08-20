@@ -19,15 +19,15 @@ export async function GET() {
           secondaryColor: '#f59e0b',
           accentColor: '#10b981',
           defaultLanguage: 'en',
-          phone: '+86 571 8273 8888',
-          email: 'info@shimond.com',
+          phone: '+86 18158194952',
+          email: 'service@shimondpvc.com',
           address: 'No. 1688 Xingye Road, Xiaoshan District, Hangzhou, China',
           socialLinks: {
             tiktok: 'https://www.tiktok.com/@shimondpvc',
             facebook: 'https://www.facebook.com/shimondpvc',
             instagram: 'https://www.instagram.com/shimondpvc',
             linkedin: 'https://www.linkedin.com/company/shimond',
-            whatsapp: 'https://wa.me/8657182738888',
+            whatsapp: 'https://wa.me/8618158194952',
           },
         },
       })

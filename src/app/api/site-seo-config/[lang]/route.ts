@@ -4,11 +4,12 @@ import { prisma } from '@/lib/prisma'
 // 获取指定语言的 SEO 配置
 export async function GET(
   request: Request,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
+  const { lang } = await params
   try {
     const config = await prisma.siteSeoConfig.findUnique({
-      where: { languageCode: params.lang },
+      where: { languageCode: lang },
     })
 
     if (!config) {

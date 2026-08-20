@@ -3,11 +3,12 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params
   try {
     const page = await prisma.page.findUnique({
-      where: { slug: params.slug, status: 'ACTIVE' },
+      where: { slug: slug, status: 'ACTIVE' },
       include: {
         modules: {
           where: { isVisible: true },

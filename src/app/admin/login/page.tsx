@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ADMIN_PATH } from '@/lib/admin-path'
 
 export default function LoginPage() {
@@ -8,6 +8,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // 已登录则自动跳转到后台
+  useEffect(() => {
+    if (document.cookie.includes('admin-token')) {
+      window.location.href = ADMIN_PATH
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

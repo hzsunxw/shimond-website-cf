@@ -353,7 +353,7 @@ export default function SeoPage() {
                   id="phone"
                   value={current.phone}
                   onChange={(e) => handleChange('phone', e.target.value)}
-                  placeholder="+86 571 8273 8888"
+                  placeholder="+86 18158194952"
                 />
               </div>
               <div className="space-y-2">
@@ -363,7 +363,7 @@ export default function SeoPage() {
                   type="email"
                   value={current.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  placeholder="info@shimond.com"
+                  placeholder="service@shimondpvc.com"
                 />
               </div>
             </div>

@@ -75,9 +75,10 @@ export default function MessagesPage() {
   }
 
   const productMap: Record<string, string> = {
-    'pvc-leather': 'PVC人造革',
+    'pvc-foam': 'PVC发泡材料',
     'pvc-mats': 'PVC地垫',
     'table-protector': '桌垫保护垫',
+    'soundproof-cotton': '隔音棉',
     'other': '其他',
   }
 
@@ -100,7 +101,7 @@ export default function MessagesPage() {
       </header>
 
       <div className="p-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -111,7 +112,7 @@ export default function MessagesPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公司</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">感兴趣的产品</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提交时间</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 z-10">操作</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -146,15 +147,15 @@ export default function MessagesPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate" title={msg.name}>
                       {msg.name}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <a href={`mailto:${msg.email}`} className="hover:text-sky-500 transition-colors">
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={msg.email}>
+                      <a href={`mailto:${msg.email}`} className="hover:text-sky-500 transition-colors block truncate">
                         {msg.email}
                       </a>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={msg.company || ''}>
                       {msg.company || '--'}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -163,7 +164,7 @@ export default function MessagesPage() {
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(msg.createdAt).toLocaleString('zh-CN')}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm space-x-2">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm space-x-2 sticky right-0 bg-white z-10">
                       {!msg.isRead && (
                         <button
                           onClick={() => markAsRead(msg.id)}

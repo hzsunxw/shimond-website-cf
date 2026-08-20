@@ -109,7 +109,7 @@ export default function OrdersPage() {
       </header>
 
       <div className="p-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -139,16 +139,16 @@ export default function OrdersPage() {
                         )}
                       </button>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900 max-w-[180px] truncate" title={order.orderNumber}>
                       {order.orderNumber}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={order.customerName}>
                       {order.customerName}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={order.customerCompany || ''}>
                       {order.customerCompany || '--'}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={order.customerPhone || ''}>
                       {order.customerPhone || '--'}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">

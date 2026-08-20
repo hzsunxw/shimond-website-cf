@@ -28,6 +28,7 @@ export async function GET(request: Request) {
         summaryEs: true,
         summaryAr: true,
         coverImage: true,
+        category: true,
         price: true,
         priceUnit: true,
         priceCurrency: true,

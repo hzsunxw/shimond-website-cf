@@ -11,7 +11,7 @@ export default async function PagesPage() {
         <h2 className="text-lg font-semibold text-gray-900">页面管理</h2>
       </header>
       <div className="p-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -26,8 +26,8 @@ export default async function PagesPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {pages.map((page: any) => (
                 <tr key={page.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{page.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.slug}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate" title={page.name}>{page.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[160px] truncate" title={page.slug}>{page.slug}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.pageType}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.status}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.showInNav ? '是' : '否'}</td>

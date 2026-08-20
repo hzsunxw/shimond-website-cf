@@ -45,12 +45,13 @@ export async function GET(request: Request) {
       }
     }
 
-    // Fallback: use Unsplash Source URLs (no API key needed)
-    const keywords = query.replace(/\s+/g, ',')
+    // Fallback: use Lorem Picsum (source.unsplash.com is deprecated since 2024)
+    // Picsum doesn't support keyword search, but seed-based URLs give stable images per query.
+    const seed = encodeURIComponent(query.replace(/\s+/g, '-').toLowerCase())
     const photos: Photo[] = Array.from({ length: 6 }, (_, i) => ({
-      id: `source-${i}`,
-      url: `https://source.unsplash.com/800x600/?${encodeURIComponent(keywords)}&sig=${i}`,
-      thumb: `https://source.unsplash.com/200x150/?${encodeURIComponent(keywords)}&sig=${i + 100}`,
+      id: `picsum-${i}`,
+      url: `https://picsum.photos/seed/${seed}-${i}/800/600`,
+      thumb: `https://picsum.photos/seed/${seed}-${i}/200/150`,
       alt: query,
     }))
 
