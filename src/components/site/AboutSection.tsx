@@ -25,7 +25,7 @@ export default function AboutSection() {
 
             <div className="mt-8">
               <a
-                href="/about#contact"
+                href="/contact"
                 className="inline-flex items-center space-x-2 bg-sky-500 text-white px-8 py-4 rounded-full font-semibold hover:bg-sky-600 transition-colors"
               >
                 <span>{t('contact')}</span>
