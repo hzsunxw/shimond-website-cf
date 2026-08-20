@@ -8,6 +8,26 @@ node_modules/
 out/
 dist/
 
+# OpenNext / Cloudflare build artifacts
+.open-next/
+.wrangler/
+
+# Local SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Product source materials (local only)
+/doc/
+
+# Temp/debug files
+temp-images/
+temp-content.txt
+tail_log.txt
+
+# Debug screenshots (root-level only)
+/*.png
+
 # Environment variables
 .env
 .env.local

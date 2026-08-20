@@ -1,18 +1,16 @@
+const { initOpenNextCloudflareForDev } = require('@opennextjs/cloudflare')
+
+if (process.env.NODE_ENV === 'development') {
+  initOpenNextCloudflareForDev()
+}
+
 /** @type {import('next').NextConfig} */
 const ADMIN_PATH = (process.env.NEXT_PUBLIC_ADMIN_PATH || '/admin').replace(/^\//, '').replace(/\/$/, '');
 
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
 
-  experimental: {
-    outputFileTracingIncludes: {
-      '/*': [
-        './node_modules/.prisma/client/**/*',
-        './public/themes/**/*',
-      ],
-    },
-  },
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
 
   images: {
     remotePatterns: [
@@ -23,9 +21,12 @@ const nextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    // If admin path is customized, rewrite external path to internal /admin
     if (ADMIN_PATH && ADMIN_PATH !== 'admin') {
       return [
+        {
+          source: `/${ADMIN_PATH}`,
+          destination: '/admin',
+        },
         {
           source: `/${ADMIN_PATH}/:path*`,
           destination: '/admin/:path*',

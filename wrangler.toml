@@ -1,0 +1,35 @@
+name = "shimond-cms"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+
+# Custom domain
+routes = [
+  { pattern = "shimondpvc.com", custom_domain = true },
+  { pattern = "www.shimondpvc.com", custom_domain = true },
+]
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "shimond-cms"
+database_id = "a667c9b4-6903-405c-a9de-98aeefa2b0f8"
+
+# R2 Bucket for file uploads
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "shimond-uploads"
+
+# Environment variables
+[vars]
+NEXTAUTH_SECRET = "change-me-in-production"
+NEXT_PUBLIC_SITE_URL = "https://shimondpvc.com"
+ACTIVE_THEME = "ver5"
+NEXT_PUBLIC_ADMIN_PATH = "a20260628"
+NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-9X4WQ7BK4X"
+NEXT_PUBLIC_CLARITY_ID = "xwgqk5laqx"
+
+# OpenNext build assets
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
