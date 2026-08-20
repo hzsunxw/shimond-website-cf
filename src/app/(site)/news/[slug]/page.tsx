@@ -21,10 +21,11 @@ async function getNewsItem(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const newsItem = await getNewsItem(params.slug)
+  const newsItem = await getNewsItem(slug)
   const seo = await getSiteSeo(locale)
   if (!newsItem) {
     return { title: t('notFound') }
@@ -34,10 +35,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const seoTitle = getLocalizedValue(newsItem, locale, 'seoTitle') || newsItem.seoTitle
   const seoDescription = getLocalizedValue(newsItem, locale, 'seoDescription') || newsItem.seoDescription
   const seoKeywords = getLocalizedValue(newsItem, locale, 'seoKeywords') || newsItem.seoKeywords
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return {
     title: seoTitle || `${title} - Shimond`,
     description: seoDescription || summary || seo?.defaultSeoDescription || undefined,
     keywords: seoKeywords || seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/news/${slug}`,
+    },
   }
 }
 
@@ -50,10 +55,11 @@ function formatDate(date: Date | null, locale: string) {
   })
 }
 
-export default async function NewsDetailPage({ params }: { params: { slug: string } }) {
+export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const newsItem = await getNewsItem(params.slug)
+  const newsItem = await getNewsItem(slug)
 
   if (!newsItem) {
     notFound()
@@ -66,7 +72,7 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
   // ── Structured data (JSON-LD) ──────────────────────────────────────────────
   const seo = await getSiteSeo(locale)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const newsUrl = `${siteUrl}/news/${params.slug}`
+  const newsUrl = `${siteUrl}/news/${slug}`
   const publisherName = seo?.companyName || 'Shimond'
 
   const articleSchema = generateArticleSchema({

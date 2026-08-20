@@ -45,10 +45,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const seo = await getSiteSeo(locale)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return {
     title: seo?.defaultSeoTitle || `${t('news')} - Shimond`,
     description: seo?.defaultSeoDescription || t('news.subtitle'),
     keywords: seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/news`,
+    },
   }
 }
 
@@ -61,6 +65,7 @@ const fallbackNews = [
     coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
     author: 'Shimond Team',
     publishAt: new Date('2024-01-15'),
+    tags: [],
   },
   {
     id: '2',
@@ -70,6 +75,7 @@ const fallbackNews = [
     coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=400&fit=crop',
     author: 'Product Team',
     publishAt: new Date('2024-02-20'),
+    tags: [],
   },
   {
     id: '3',
@@ -79,6 +85,7 @@ const fallbackNews = [
     coverImage: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&h=400&fit=crop',
     author: 'Marketing Team',
     publishAt: new Date('2024-03-10'),
+    tags: [],
   },
 ]
 
@@ -95,7 +102,7 @@ export default async function NewsPage() {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const news = await getNews()
-  const display = news.length > 0 ? news : fallbackNews
+  const display = (news.length > 0 ? news : fallbackNews) as typeof fallbackNews
 
   if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/NewsPage'); return <C locale={locale} news={display} /> }
   if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/NewsPage'); return <C locale={locale} news={display} /> }

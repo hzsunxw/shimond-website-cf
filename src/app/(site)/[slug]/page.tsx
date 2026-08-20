@@ -33,33 +33,45 @@ const pageTypeEnNames: Record<string, string> = {
   contact: 'Contact Us',
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const page = await getPage(params.slug)
+  const page = await getPage(slug)
   const seo = await getSiteSeo(locale)
   if (!page) {
     return { title: t('notFound') }
   }
-  const pageType = (page as any).pageType || params.slug
+  const pageType = (page as any).pageType || slug
   const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return {
     title: page.seoTitle || seo?.defaultSeoTitle || displayName,
     description: page.seoDescription || seo?.defaultSeoDescription || undefined,
     keywords: page.seoKeywords || seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/${slug}`,
+      languages: {
+        zh: `${siteUrl}/${slug}`,
+        en: `${siteUrl}/${slug}`,
+        es: `${siteUrl}/${slug}`,
+        ar: `${siteUrl}/${slug}`,
+      },
+    },
   }
 }
 
-export default async function DynamicPage({ params }: { params: { slug: string } }) {
+export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const page = await getPage(params.slug)
+  const page = await getPage(slug)
 
   if (!page) {
     notFound()
   }
 
-  const pageType = (page as any).pageType || params.slug
+  const pageType = (page as any).pageType || slug
   const displayName = locale !== 'zh' ? (pageTypeEnNames[pageType] || page.name) : page.name
 
   if (pageType === 'about') {

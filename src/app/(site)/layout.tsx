@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   const title = seo?.siteTitle || seo?.defaultSeoTitle || 'Shimond - Professional PVC Products Manufacturer'
   const description = seo?.siteDescription || seo?.defaultSeoDescription || 'Professional manufacturer of high-quality PVC leather, mats, and table protectors.'
-  const ogImage = seo?.defaultOgImage || `${siteUrl}/og-image.jpg`
+  const ogImage = seo?.defaultOgImage || `${siteUrl}/og-image.png`
 
   return {
     metadataBase: new URL(siteUrl),
@@ -83,15 +83,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       images: [ogImage],
-    },
-    alternates: {
-      canonical: siteUrl,
-      languages: {
-        zh: `${siteUrl}`,
-        en: `${siteUrl}`,
-        es: `${siteUrl}`,
-        ar: `${siteUrl}`,
-      },
     },
   }
 }

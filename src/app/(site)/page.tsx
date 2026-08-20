@@ -101,7 +101,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   const title = seo?.siteTitle || seo?.defaultSeoTitle || `Shimond - ${t('hero.tagline')}`
   const description = seo?.siteDescription || seo?.defaultSeoDescription || t('hero.subtitle')
-  const ogImage = seo?.defaultOgImage || `${siteUrl}/og-image.jpg`
+  const ogImage = seo?.defaultOgImage || `${siteUrl}/og-image.png`
 
   return {
     title,
@@ -154,22 +154,22 @@ export default async function HomePage() {
 
   if (isVer3Theme()) {
     const { default: Ver3HomePage } = await import('@/themes/ver3/HomePage')
-    return <Ver3HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+    return <Ver3HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config as { address?: string | null; phone?: string | null; email?: string | null; socialLinks?: Record<string, string> | null }} />
   }
 
   if (isVer4Theme()) {
     const { default: Ver4HomePage } = await import('@/themes/ver4/HomePage')
-    return <Ver4HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+    return <Ver4HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config as { address?: string | null; phone?: string | null; email?: string | null; socialLinks?: Record<string, string> | null }} />
   }
 
   if (isVer5Theme()) {
     const { default: Ver5HomePage } = await import('@/themes/ver5/HomePage')
-    return <Ver5HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+    return <Ver5HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config as { address?: string | null; phone?: string | null; email?: string | null; socialLinks?: Record<string, string> | null }} />
   }
 
   if (isVer6Theme()) {
     const { default: Ver6HomePage } = await import('@/themes/ver6/HomePage')
-    return <Ver6HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config} />
+    return <Ver6HomePage locale={locale} products={products.length > 0 ? products : fallbackProducts} config={config as { address?: string | null; phone?: string | null; email?: string | null; socialLinks?: Record<string, string> | null }} />
   }
 
   return (

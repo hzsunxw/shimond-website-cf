@@ -21,10 +21,11 @@ async function getCase(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const caseItem = await getCase(params.slug)
+  const caseItem = await getCase(slug)
   const seo = await getSiteSeo(locale)
   if (!caseItem) {
     return { title: t('notFound') }
@@ -34,17 +35,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const seoTitle = getLocalizedValue(caseItem, locale, 'seoTitle') || caseItem.seoTitle
   const seoDescription = getLocalizedValue(caseItem, locale, 'seoDescription') || caseItem.seoDescription
   const seoKeywords = getLocalizedValue(caseItem, locale, 'seoKeywords') || caseItem.seoKeywords
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return {
     title: seoTitle || `${title} - Shimond`,
     description: seoDescription || summary || seo?.defaultSeoDescription || undefined,
     keywords: seoKeywords || seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/cases/${slug}`,
+    },
   }
 }
 
-export default async function CaseDetailPage({ params }: { params: { slug: string } }) {
+export default async function CaseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
-  const caseItem = await getCase(params.slug)
+  const caseItem = await getCase(slug)
 
   if (!caseItem) {
     notFound()
@@ -57,7 +63,7 @@ export default async function CaseDetailPage({ params }: { params: { slug: strin
   // ── Structured data (JSON-LD) ──────────────────────────────────────────────
   const seo = await getSiteSeo(locale)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const caseUrl = `${siteUrl}/cases/${params.slug}`
+  const caseUrl = `${siteUrl}/cases/${slug}`
   const publisherName = seo?.companyName || 'Shimond'
 
   const articleSchema = generateArticleSchema({

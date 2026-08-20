@@ -40,45 +40,22 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const seo = await getSiteSeo(locale)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return {
     title: seo?.defaultSeoTitle || `${t('cases')} - Shimond`,
     description: seo?.defaultSeoDescription || t('cases.subtitle'),
     keywords: seo?.defaultSeoKeywords || undefined,
+    alternates: {
+      canonical: `${siteUrl}/cases`,
+    },
   }
 }
-
-const fallbackCases = [
-  {
-    id: '1',
-    title: 'European Furniture Brand Partnership',
-    slug: 'europe-furniture',
-    clientName: 'EuroFurn Co.',
-    summary: 'Provided high-quality PVC synthetic leather for sofas and seating manufacturing.',
-    coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=450&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'Automotive Interior Project',
-    slug: 'automotive-interior',
-    clientName: 'AutoTech Inc.',
-    summary: 'Supplied wear-resistant, eco-friendly PVC interior materials for automotive manufacturers.',
-    coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Commercial Flooring Project',
-    slug: 'commercial-flooring',
-    clientName: 'BuildRight Ltd.',
-    summary: 'Large-scale commercial space PVC mat supply project covering over 5,000 square meters.',
-    coverImage: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&h=450&fit=crop',
-  },
-]
 
 export default async function CasesPage() {
   const locale = await getServerLocale()
   const t = (key: string) => getTranslation(locale, key)
   const cases = await getCases()
-  const display = cases.length > 0 ? cases : fallbackCases
+  const display = cases
 
   if (isVer3Theme()) { const { default: C } = await import('@/themes/ver3/CasesPage'); return <C locale={locale} cases={display} /> }
   if (isVer4Theme()) { const { default: C } = await import('@/themes/ver4/CasesPage'); return <C locale={locale} cases={display} /> }
