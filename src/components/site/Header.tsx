@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Globe, Menu, X, ChevronDown, ShoppingCart } from 'lucide-react'
 import { setLocale } from '@/lib/i18n'
+import { getTranslation } from '@/lib/dictionary'
 import { useLocale } from '@/components/LocaleProvider'
 
 interface NavPage {
@@ -61,9 +62,18 @@ const translations = {
   },
 }
 
+const productCategories = [
+  { slug: 'pvc-foam', labelKey: 'product.category.pvcFoam' },
+  { slug: 'pvc-mats', labelKey: 'product.category.pvcMats' },
+  { slug: 'table-protector', labelKey: 'product.category.tableProtector' },
+  { slug: 'soundproof-cotton', labelKey: 'product.category.soundproofCotton' },
+]
+
 export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langDropdownOpen, setLangDropdownOpen] = useState(false)
+  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false)
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const locale = useLocale()
 
@@ -123,16 +133,51 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            {navPages.map((page) => (
-              <Link
-                key={page.slug}
-                href={`/${page.slug}`}
-                className="relative text-gray-700 hover:text-sky-500 font-medium transition-colors py-2 group"
-              >
-                {page.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300 group-hover:w-full" />
-              </Link>
-            ))}
+            {navPages.map((page) => {
+              if (page.pageType === 'products') {
+                return (
+                  <div
+                    key={page.slug}
+                    className="relative"
+                    onMouseEnter={() => setProductsDropdownOpen(true)}
+                    onMouseLeave={() => setProductsDropdownOpen(false)}
+                  >
+                    <Link
+                      href={`/${page.slug}`}
+                      className="relative text-gray-700 hover:text-sky-500 font-medium transition-colors py-2 group flex items-center"
+                    >
+                      {page.name}
+                      <ChevronDown className="w-3 h-3 ml-0.5" />
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300 group-hover:w-full" />
+                    </Link>
+                    {productsDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                        {productCategories.map((cat) => (
+                          <Link
+                            key={cat.slug}
+                            href={`/products/category/${cat.slug}`}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-colors"
+                            onClick={() => setProductsDropdownOpen(false)}
+                          >
+                            {getTranslation(locale, cat.labelKey)}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              return (
+                <Link
+                  key={page.slug}
+                  href={`/${page.slug}`}
+                  className="relative text-gray-700 hover:text-sky-500 font-medium transition-colors py-2 group"
+                >
+                  {page.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300 group-hover:w-full" />
+                </Link>
+              )
+            })}
           </div>
 
           {/* Right Actions */}
@@ -188,7 +233,7 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
             </div>
 
             <Link
-              href="/about#contact"
+              href="/contact"
               className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg hover:shadow-sky-500/30 transition-all transform hover:scale-105"
             >
               {t.contact}
@@ -211,16 +256,45 @@ export default function SiteHeader({ siteName = 'Shimond', pages = [] }: HeaderP
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-4 space-y-3">
-            {navPages.map((page) => (
-              <Link
-                key={page.slug}
-                href={`/${page.slug}`}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-sky-500 font-medium py-2"
-              >
-                {page.name}
-              </Link>
-            ))}
+            {navPages.map((page) => {
+              if (page.pageType === 'products') {
+                return (
+                  <div key={page.slug}>
+                    <button
+                      onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                      className="flex items-center justify-between w-full text-gray-700 hover:text-sky-500 font-medium py-2"
+                    >
+                      {page.name}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${mobileProductsOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {mobileProductsOpen && (
+                      <div className="pl-4 space-y-1">
+                        {productCategories.map((cat) => (
+                          <Link
+                            key={cat.slug}
+                            href={`/products/category/${cat.slug}`}
+                            onClick={() => { setMobileMenuOpen(false); setMobileProductsOpen(false) }}
+                            className="block text-sm text-gray-600 hover:text-sky-500 py-1.5"
+                          >
+                            {getTranslation(locale, cat.labelKey)}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              return (
+                <Link
+                  key={page.slug}
+                  href={`/${page.slug}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-gray-700 hover:text-sky-500 font-medium py-2"
+                >
+                  {page.name}
+                </Link>
+              )
+            })}
             <Link
               href="/inquiry"
               onClick={() => setMobileMenuOpen(false)}
