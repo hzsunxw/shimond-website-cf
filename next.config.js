@@ -20,6 +20,19 @@ const nextConfig = {
     ],
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      // Legacy placeholder case pages (fallback data removed) → 301 to cases list
+      { source: '/cases/commercial-flooring', destination: '/cases', permanent: true },
+      { source: '/cases/europe-furniture', destination: '/cases', permanent: true },
+      { source: '/cases/europe-furniture-leather', destination: '/cases', permanent: true },
+      { source: '/cases/automotive-interior', destination: '/cases', permanent: true },
+      // Legacy placeholder news pages (fallback data removed) → 301 to news list
+      { source: '/news/iso-certification', destination: '/news', permanent: true },
+      { source: '/news/eco-pvc-launch', destination: '/news', permanent: true },
+      { source: '/news/trade-show-2024', destination: '/news', permanent: true },
+    ];
+  },
   async rewrites() {
     if (ADMIN_PATH && ADMIN_PATH !== 'admin') {
       return [
