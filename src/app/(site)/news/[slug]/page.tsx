@@ -149,9 +149,17 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
             {summary && <p className="text-lg text-gray-600 mb-8 font-medium">{summary}</p>}
 
-            {content && (
-              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap leading-relaxed">{content}</div>
-            )}
+            {content && (() => {
+              const isHtml = /<[a-z][\s\S]*>/i.test(content)
+              return isHtml ? (
+                <div
+                  className="prose max-w-none text-gray-600 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              ) : (
+                <div className="prose max-w-none text-gray-600 whitespace-pre-wrap leading-relaxed">{content}</div>
+              )
+            })()}
           </div>
         </article>
       </div>

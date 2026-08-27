@@ -277,7 +277,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {productDescription && (
           <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('product.details')}</h2>
-            <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{productDescription}</div>
+            {(() => {
+              const isHtml = /<[a-z][\s\S]*>/i.test(productDescription)
+              return isHtml ? (
+                <div
+                  className="prose max-w-none text-gray-600"
+                  dangerouslySetInnerHTML={{ __html: productDescription }}
+                />
+              ) : (
+                <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{productDescription}</div>
+              )
+            })()}
           </div>
         )}
       </div>

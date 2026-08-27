@@ -107,9 +107,17 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ slu
               <p className="text-sky-500 font-medium mb-6">{t('case.client')}: {caseItem.clientName}</p>
             )}
             {summary && <p className="text-lg text-gray-600 mb-8">{summary}</p>}
-            {description && (
-              <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{description}</div>
-            )}
+            {description && (() => {
+              const isHtml = /<[a-z][\s\S]*>/i.test(description)
+              return isHtml ? (
+                <div
+                  className="prose max-w-none text-gray-600"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
+              ) : (
+                <div className="prose max-w-none text-gray-600 whitespace-pre-wrap">{description}</div>
+              )
+            })()}
           </div>
         </div>
       </div>
