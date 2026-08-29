@@ -79,18 +79,23 @@ export default function SiteFooter({
             <h4 className="text-lg font-bold mb-6">{t('products')}</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/products" className="text-gray-400 hover:text-white transition-colors">
-                  {t('product.pvcLeather')}
+                <Link href="/pvc-foam-board-suppliers" className="text-gray-400 hover:text-white transition-colors">
+                  PVC Foam Board Suppliers
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-gray-400 hover:text-white transition-colors">
-                  {t('product.pvcMats')}
+                <Link href="/products/category/pvc-foam" className="text-gray-400 hover:text-white transition-colors">
+                  {t('product.category.pvcFoam')}
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-gray-400 hover:text-white transition-colors">
-                  {t('product.tableProtector')}
+                <Link href="/products/category/pvc-mats" className="text-gray-400 hover:text-white transition-colors">
+                  {t('product.category.pvcMats')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/category/table-protector" className="text-gray-400 hover:text-white transition-colors">
+                  {t('product.category.tableProtector')}
                 </Link>
               </li>
               <li>

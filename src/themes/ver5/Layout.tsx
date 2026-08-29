@@ -62,9 +62,10 @@ export default function Layout({
             <div className="footer-col">
               <h4>{t('footer.products')}</h4>
               <ul>
-                <li><Link href="/products">{t('footer.product.pvcLeather')}</Link></li>
-                <li><Link href="/products">{t('footer.product.pvcMats')}</Link></li>
-                <li><Link href="/products">{t('footer.product.tableProtector')}</Link></li>
+                <li><Link href="/pvc-foam-board-suppliers">PVC Foam Board Suppliers</Link></li>
+                <li><Link href="/products/category/pvc-foam">{t('product.category.pvcFoam')}</Link></li>
+                <li><Link href="/products/category/pvc-mats">{t('product.category.pvcMats')}</Link></li>
+                <li><Link href="/products/category/table-protector">{t('product.category.tableProtector')}</Link></li>
                 <li><Link href="/contact">{t('footer.customOrders')}</Link></li>
               </ul>
             </div>
